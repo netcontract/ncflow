@@ -1,0 +1,16 @@
+ArgParse
+Cairo
+Combinatorics
+Compose
+DelimitedFiles
+Fontconfig
+GraphPlot
+Gurobi
+HTTP
+JSON2
+JuMP (v0.18.5)
+LightGraphs
+ProgressMeter
+PyPlot
+Sockets
+MathOptFormat

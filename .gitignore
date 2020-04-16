@@ -1,0 +1,10 @@
+*.sw*
+*.pyc
+*.log
+*.txt
+*.ipynb_checkpoints
+*.sol
+*.lp
+fm_rundir/
+traffic-matrices/
+traffic-matrices.zip
