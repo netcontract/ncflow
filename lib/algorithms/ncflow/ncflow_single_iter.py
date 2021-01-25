@@ -23,7 +23,7 @@ class NCFlowSingleIter(NCFlowAbstract):
         if out is None:
             out = sys.stdout
         return cls(objective=Objective.MAX_FLOW,
-                   DEBUG=True,
+                   DEBUG=False,
                    VERBOSE=False,
                    out=out)
 
@@ -300,7 +300,8 @@ class NCFlowSingleIter(NCFlowAbstract):
         path_vars = m.addVars(path_i, vtype=GRB.CONTINUOUS, lb=0.0, name='f')
 
         # Set objective
-        self._print('Not applying min max util in R1')
+        if self.VERBOSE:
+            self._print('Not applying min max util in R1')
         obj = quicksum(path_vars)
 
         m.setObjective(obj, GRB.MAXIMIZE)
@@ -829,10 +830,11 @@ class NCFlowSingleIter(NCFlowAbstract):
         obj = quicksum(commod_vars)
         m.setObjective(obj, GRB.MAXIMIZE)
 
-        self._print('--> total_u_flow=',
-                    sum(tot_u_flow.values()), '; ', tot_u_flow)
-        self._print('--> total_v_flow=',
-                    sum(tot_v_flow.values()), '; ', tot_v_flow)
+        if self.VERBOSE:
+            self._print('--> total_u_flow=',
+                        sum(tot_u_flow.values()), '; ', tot_u_flow)
+            self._print('--> total_v_flow=',
+                        sum(tot_v_flow.values()), '; ', tot_v_flow)
 
         if debug_recon:
             model_output_file = "recon_%sout_%sin.lp" % (u_meta, v_meta)
@@ -970,7 +972,8 @@ class NCFlowSingleIter(NCFlowAbstract):
 
         # R1
         self._runtime_dict = {}
-        self._print('R1')
+        if self.VERBOSE:
+            self._print('R1')
 
         r1_solver = self._r1_lp(r1_paths_dict, self.meta_commodity_list)
         r1_solver.gurobi_out = self.out.name.replace('.txt', '-r1.txt')
@@ -991,7 +994,8 @@ class NCFlowSingleIter(NCFlowAbstract):
                        self.out.name.replace('.txt', '-r1-sol-dict.pkl'))
 
         # R2
-        self._print('\nR2')
+        if self.VERBOSE:
+            self._print('\nR2')
         self._runtime_dict['r2'] = {}
         self.r2_meta_sols_dicts = []
         self.r2_sols_mats = []
@@ -1073,7 +1077,8 @@ class NCFlowSingleIter(NCFlowAbstract):
                         '.txt', '-r2-{}-meta-sol-dict.pkl'.format(meta_node_id)))
 
             else:
-                self._print('Meta node {} has no R2 commodities')
+                if self.VERBOSE:
+                    self._print('Meta node {} has no R2 commodities')
                 self.r2_models.append(None)
                 self.r2_mc_lists.append([])
                 self.r2_paths.append([])
@@ -1107,8 +1112,9 @@ class NCFlowSingleIter(NCFlowAbstract):
             lambda: defaultdict(float))
 
         for u_meta, v_meta in self.G_meta.edges:
-            self._print('\nReconciliation: {} (out) and {} (in)'.format(
-                u_meta, v_meta))
+            if self.VERBOSE:
+                self._print('\nReconciliation: {} (out) and {} (in)'.format(
+                    u_meta, v_meta))
             reconciliation_solver, G_u_meta_v_meta, meta_commod_u_out_v_in, \
                 nodes_in_u_meta, nodes_in_v_meta = self._reconciliation_lp(
                     u_meta, v_meta)
@@ -1130,10 +1136,10 @@ class NCFlowSingleIter(NCFlowAbstract):
                 reconciliation_solver.model, meta_commod_u_out_v_in,
                 list(G_u_meta_v_meta.edges))
 
-            # if self.VERBOSE:
-            self._print(meta_commod_u_out_v_in)
-            self._print('Reconciliation sol dict: {}'.format(
-                reconciliation_sol_dict))
+            if self.VERBOSE:
+                self._print(meta_commod_u_out_v_in)
+                self._print('Reconciliation sol dict: {}'.format(
+                    reconciliation_sol_dict))
 
             self.reconciliation_sol_dicts[(
                 u_meta, v_meta)] = reconciliation_sol_dict
@@ -1164,11 +1170,13 @@ class NCFlowSingleIter(NCFlowAbstract):
                 recon_loss[k_meta] = min(
                     rmof_u, rmif_v) - after_recon_flow[k_meta]
 
-            self._print('Recon loss, Total={:.3f}; per meta-commod= {}'.
-                        format(sum(recon_loss.values()), recon_loss))
+            if self.VERBOSE:
+                self._print('Recon loss, Total={:.3f}; per meta-commod= {}'.
+                            format(sum(recon_loss.values()), recon_loss))
 
         # Kirchoff's
-        self._print('\nKirchoff\'s')
+        if self.VERBOSE:
+            self._print('\nKirchoff\'s')
         adjusted_meta_commodity_list = []
         self.r2_src_out_flows = self.divide_into_multi_commod_flows(
             self.r2_srcs_out_flow_lists, 0)
@@ -1191,7 +1199,8 @@ class NCFlowSingleIter(NCFlowAbstract):
             kirchoffs_solver = self._kirchoffs_lp(
                 meta_commod_key, orig_commod_list_in_k_meta)
             kirchoffs_solver.solve_lp()
-            self._print('\ns_k_meta: {}, t_k_meta: {}, obj val: {}'.format(s_k_meta, t_k_meta, kirchoffs_solver.obj_val))
+            if self.VERBOSE:
+                self._print('\ns_k_meta: {}, t_k_meta: {}, obj val: {}'.format(s_k_meta, t_k_meta, kirchoffs_solver.obj_val))
             self._runtime_dict['kirchoffs'][(
                 s_k_meta, t_k_meta)] = kirchoffs_solver.model.Runtime
             flow_per_commod = self._extract_kirchoffs_sol(
@@ -1211,7 +1220,8 @@ class NCFlowSingleIter(NCFlowAbstract):
 
         # R3: Re-run R1, with a node capacity for each meta-commodity based on
         # the output of R2 and reconciliation
-        self._print('\nR3')
+        if self.VERBOSE:
+            self._print('\nR3')
         self.adjusted_meta_commodity_list = adjusted_meta_commodity_list
         r3_solver = self._r3_lp(adjusted_meta_commodity_list)
         r3_solver.gurobi_out = self.out.name.replace('.txt', '-r3.txt')
