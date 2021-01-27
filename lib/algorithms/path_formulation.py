@@ -45,6 +45,7 @@ class PathFormulation(AbstractFormulation):
                    VERBOSE=False,
                    out=out)
 
+
     def __init__(self, *, objective, num_paths, edge_disjoint, dist_metric, DEBUG, VERBOSE, out=None):
         super().__init__(objective, DEBUG, VERBOSE, out)
         if dist_metric != 'inv-cap' and dist_metric != 'min-hop':

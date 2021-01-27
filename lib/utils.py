@@ -1,4 +1,5 @@
 import numpy as np
+from .graph_utils import assert_flow_conservation
 from collections import defaultdict
 
 # sort commods from lowest demand to highest demand
@@ -101,3 +102,43 @@ def link_util_stats(G, sol_dict):
     values = list(edge_utils.values())
 
     return np.min(values), np.median(values), np.mean(values), np.max(values)
+
+# Takes one or more sol_dicts for a given problem; determines if the solution
+# (i.e. all the sol_dicts) is feasible. If the solution is not feasible, an
+# exception will be thrown via a failed assertion.
+#
+# Also computes objective value for MAX
+# FLOW, and prints out the bottleneck edges yielded by the solution
+def check_feasibility(problem, sol_dicts):
+    print('Checking feasibility of solution')
+    obj_val = 0.0
+    EPS = 1e-3
+
+    G_copy = problem.G.copy()
+    print('checking flow conservation')
+    for sol_dict in sol_dicts:
+        for commod_key, flow_list in sol_dict.items():
+            flow_for_commod = assert_flow_conservation(flow_list, commod_key)
+            # assert demand constraints
+            assert flow_for_commod <= commod_key[-1][-1] + EPS
+            obj_val += flow_for_commod
+            for (u, v), flow_val in flow_list:
+                G_copy[u][v]['capacity'] -= flow_val
+                # if G_copy[u][v]['capacity'] < 0.0:
+                #     print(u, v, G_copy[u][v]['capacity'])
+                assert G_copy[u][v]['capacity'] > -EPS
+
+    print('checking capacity constraints')
+    edge_percent_cap_remaining = []
+    for u, v, cap in G_copy.edges.data('capacity'):
+        # if G_copy[u][v]['capacity'] < 0.0:
+        #     print(u, v, G_copy[u][v]['capacity'])
+        assert G_copy[u][v]['capacity'] > -EPS
+        if problem.G[u][v]['capacity'] == 0.0:
+            continue
+        edge_percent_cap_remaining.append(
+            (u, v, cap / problem.G[u][v]['capacity']))
+
+    bottleneck_edges = sorted(
+        edge_percent_cap_remaining, key=lambda x: x[-1])
+    print('Bottleneck edges')
