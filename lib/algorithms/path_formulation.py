@@ -45,6 +45,16 @@ class PathFormulation(AbstractFormulation):
                    VERBOSE=False,
                    out=out)
 
+    @classmethod
+    def get_pf_for_obj(cls, objective, num_paths, **kargs):
+        if objective == Objective.MAX_FLOW:
+            return cls.new_max_flow(num_paths, **kargs)
+        elif objective == Objective.MIN_MAX_LINK_UTIL:
+            return cls.new_min_max_link_util(num_paths, **kargs)
+        elif objective == Objective.COMPUTE_DEMAND_SCALE_FACTOR:
+            return cls.compute_demand_scale_factor(num_paths, **kargs)
+        else:
+            print('objective "{}" not found'.format(objective))
 
     def __init__(self, *, objective, num_paths, edge_disjoint, dist_metric, DEBUG, VERBOSE, out=None):
         super().__init__(objective, DEBUG, VERBOSE, out)
