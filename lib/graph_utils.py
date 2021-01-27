@@ -302,7 +302,7 @@ def check_feasibility(problem, sol_dicts):
                 # if G_copy[u][v]['capacity'] < 0.0:
                 #     print(u, v, G_copy[u][v]['capacity'])
                 assert G_copy[u][v]['capacity'] > -EPS
-
+    print('Full Obj: ' + str(obj_val))
     print('checking capacity constraints')
     edge_percent_cap_remaining = []
     for u, v, cap in G_copy.edges.data('capacity'):
