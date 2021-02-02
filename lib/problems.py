@@ -770,82 +770,82 @@ PROBLEM_ARGS = {
     },
     'erdos-renyi-1228717540': {
         'poisson-high-intra': {
-            'decay': 0.35,
-            'lam': 8e9,
-            'const_factor': 4.3e-9,
+            'decay': 0.01,
+            'lam': 5e13,
+            'const_factor': 1e-9,
         },
         'poisson-high-inter': {
-            'decay': 0.9,
-            'lam': 1e4,
-            'const_factor': 3.3e-6,
+            'decay': 0.75,
+            'lam': 1e3,
+            'const_factor': 2.0e-3,
         },
         'exponential': {},
         'behnaz': {},
         'uniform': {
-            'max_demand': 0.005
+            'max_demand': 0.5
         },
         'gravity': {
-            'total_demand': 1500.0,
+            'total_demand': 480000.0,
             'random': True
         },
         'bimodal': {
             'fraction': 0.2,
-            'low_range': (0.0, 0.00275),
-            'high_range': (0.0055, 0.011),
+            'low_range': (0.0, 0.25),
+            'high_range': (0.5, 1.),
         },
         'fname': 'erdos-renyi-1228717540.json'
     },
     'erdos-renyi-23401846': {
         'poisson-high-intra': {
-            'decay': 0.35,
-            'lam': 8e9,
-            'const_factor': 4.3e-9,
+            'decay': 0.01,
+            'lam': 5e13,
+            'const_factor': 1e-9,
         },
         'poisson-high-inter': {
-            'decay': 0.9,
-            'lam': 1e4,
-            'const_factor': 3.3e-6,
+            'decay': 0.75,
+            'lam': 1e3,
+            'const_factor': 2.0e-3,
         },
         'exponential': {},
         'behnaz': {},
         'uniform': {
-            'max_demand': 0.005
+            'max_demand': 0.5
         },
         'gravity': {
-            'total_demand': 1500.0,
+            'total_demand': 480000.0,
             'random': True
         },
         'bimodal': {
             'fraction': 0.2,
-            'low_range': (0.0, 0.00275),
-            'high_range': (0.0055, 0.011),
+            'low_range': (0.0, 0.25),
+            'high_range': (0.5, 1.),
         },
         'fname': 'erdos-renyi-23401846.json'
     },
     'erdos-renyi-642708444': {
         'poisson-high-intra': {
-            'decay': 0.35,
-            'lam': 8e9,
-            'const_factor': 4.3e-9,
+            'decay': 0.01,
+            'lam': 5e13,
+            'const_factor': 1e-9,
         },
         'poisson-high-inter': {
-            'decay': 0.9,
-            'lam': 1e4,
-            'const_factor': 3.3e-6,
+            'decay': 0.75,
+            'lam': 1e3,
+            'const_factor': 2.0e-3,
         },
         'exponential': {},
         'behnaz': {},
         'uniform': {
-            'max_demand': 0.005
+            'max_demand': 0.5
         },
         'gravity': {
-            'total_demand': 1500.0,
+            'total_demand': 480000.0,
             'random': True
         },
         'bimodal': {
             'fraction': 0.2,
-            'low_range': (0.0, 0.00275),
-            'high_range': (0.0055, 0.011),
+            'low_range': (0.0, 0.25),
+            'high_range': (0.5, 1.),
         },
         'fname': 'erdos-renyi-642708444.json'
     },
