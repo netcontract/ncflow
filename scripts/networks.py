@@ -178,6 +178,10 @@ def bottleneck_network(cap=10.0, epsilon=1e-3):
     return G
 
 
+def erdos_renyi(num_nodes, prob, seed=None):
+    return nx.erdos_renyi_graph(num_nodes, prob, seed=seed, directed=True)
+
+
 #################
 # Real Networks #
 #################
@@ -223,6 +227,11 @@ if __name__ == '__main__':
     elif arg == 'dumbell-bottleneck':
         G = dumbell_bottleneck_network()
         fname = 'dumbell-bottleneck.json'
+
+    elif arg == 'erdos-renyi':
+        seed = np.random.randint(2**31 - 1)
+        G = erdos_renyi(1000, 0.01, seed=seed)
+        fname = 'erdos-renyi-{}'.format(seed)
 
     data = json_graph.node_link_data(G)
     write_graph_json(os.path.join(OUTPUT_DIR, fname), G)
