@@ -12,7 +12,8 @@ from lib.partitioning import FMPartitioning, SpectralClustering
 PROBLEM_NAMES = [
     'GtsCe.graphml', 'UsCarrier.graphml', 'Cogentco.graphml', 'Colt.graphml',
     'TataNld.graphml', 'Deltacom.graphml', 'DialtelecomCz.graphml',
-    'Uninett2010.graphml', 'Interoute.graphml', 'Ion.graphml', 'Kdl.graphml'
+    'Uninett2010.graphml', 'Interoute.graphml', 'Ion.graphml', 'Kdl.graphml',
+    'erdos-renyi-1260231677.json'
 ]
 
 PATH_FORM_HYPERPARAMS = (4, True, 'inv-cap')
@@ -28,6 +29,7 @@ NCFLOW_HYPERPARAMS = {
     'Interoute.graphml': (4, True, 'inv-cap', SpectralClustering, 2),
     'Ion.graphml': (4, True, 'inv-cap', FMPartitioning, 3),
     'Kdl.graphml': (4, True, 'inv-cap', FMPartitioning, 3),
+    'erdos-renyi-1260231677.json': (4, True, 'inv-cap', FMPartitioning, 3),
 }
 
 TM_MODELS = [
