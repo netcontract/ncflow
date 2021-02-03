@@ -782,28 +782,28 @@ PROBLEM_ARGS = {
     },
     'erdos-renyi-1260231677': {
         'poisson-high-intra': {
-            'decay': 0.01,
+            'decay': 0.001,
             'lam': 5e13,
-            'const_factor': 1e-9,
+            'const_factor': 2e-9,
         },
         'poisson-high-inter': {
             'decay': 0.75,
             'lam': 1e3,
-            'const_factor': 2.0e-3,
+            'const_factor': 1.75e-3,
         },
         'exponential': {},
         'behnaz': {},
         'uniform': {
-            'max_demand': 0.5
+            'max_demand': 1.0
         },
         'gravity': {
-            'total_demand': 480000.0,
+            'total_demand': 500000.0,
             'random': True
         },
         'bimodal': {
             'fraction': 0.2,
-            'low_range': (0.0, 0.25),
-            'high_range': (0.5, 1.),
+            'low_range': (0.0, 0.5),
+            'high_range': (1.0, 2.0),
         },
         'fname': 'erdos-renyi-1260231677.json'
     },
