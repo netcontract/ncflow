@@ -52,6 +52,7 @@ if __name__ == '__main__':
         'ion',
         'uninett',
         'kdl',
+        'erdos-renyi-1260231677',
     ]
     if len(sys.argv) == 2 and sys.argv[1] == '--holdout':
         TM_DIR += '/holdout'

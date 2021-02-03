@@ -20,6 +20,18 @@ class TopologyZooProblem(Problem):
         return self._fname
 
 
+class JsonProblem(Problem):
+    def __init__(self, fname, *, model='gravity', seed=0, scale_factor=1.0, **kwargs):
+        self._fname = fname
+        G = Problem._read_graph_json(
+            os.path.join(TOPOLOGIES_DIR, fname))
+        super().__init__(G, model=model, seed=seed, scale_factor=scale_factor, **kwargs)
+
+    @property
+    def name(self):
+        return self._fname
+
+
 #################
 # Fake problems #
 #################
@@ -768,7 +780,7 @@ PROBLEM_ARGS = {
         },
         'fname': 'UsCarrier.graphml'
     },
-    'erdos-renyi-1228717540': {
+    'erdos-renyi-1260231677': {
         'poisson-high-intra': {
             'decay': 0.01,
             'lam': 5e13,
@@ -793,61 +805,7 @@ PROBLEM_ARGS = {
             'low_range': (0.0, 0.25),
             'high_range': (0.5, 1.),
         },
-        'fname': 'erdos-renyi-1228717540.json'
-    },
-    'erdos-renyi-23401846': {
-        'poisson-high-intra': {
-            'decay': 0.01,
-            'lam': 5e13,
-            'const_factor': 1e-9,
-        },
-        'poisson-high-inter': {
-            'decay': 0.75,
-            'lam': 1e3,
-            'const_factor': 2.0e-3,
-        },
-        'exponential': {},
-        'behnaz': {},
-        'uniform': {
-            'max_demand': 0.5
-        },
-        'gravity': {
-            'total_demand': 480000.0,
-            'random': True
-        },
-        'bimodal': {
-            'fraction': 0.2,
-            'low_range': (0.0, 0.25),
-            'high_range': (0.5, 1.),
-        },
-        'fname': 'erdos-renyi-23401846.json'
-    },
-    'erdos-renyi-642708444': {
-        'poisson-high-intra': {
-            'decay': 0.01,
-            'lam': 5e13,
-            'const_factor': 1e-9,
-        },
-        'poisson-high-inter': {
-            'decay': 0.75,
-            'lam': 1e3,
-            'const_factor': 2.0e-3,
-        },
-        'exponential': {},
-        'behnaz': {},
-        'uniform': {
-            'max_demand': 0.5
-        },
-        'gravity': {
-            'total_demand': 480000.0,
-            'random': True
-        },
-        'bimodal': {
-            'fraction': 0.2,
-            'low_range': (0.0, 0.25),
-            'high_range': (0.5, 1.),
-        },
-        'fname': 'erdos-renyi-642708444.json'
+        'fname': 'erdos-renyi-1260231677.json'
     },
 }
 
@@ -859,13 +817,19 @@ def get_problem(prob_name, model='gravity', seed=0, scale_factor=1.0, **kwargs):
     for k, v in kwargs.items():
         all_kwargs[k] = v
 
+    # poisson-high-{intra,inter} needs to be mapped to just poisson for the
+    # TrafficMatrix class
     if model.startswith('poisson'):
         model = 'poisson'
-    elif prob_name == 'toy':
+
+    if prob_name == 'toy':
         return ToyProblem()
     elif prob_name in PROBLEM_ARGS:
         # From Topology Zoo
         fname = PROBLEM_ARGS[prob_name]['fname']
-        return TopologyZooProblem(fname, model=model, scale_factor=scale_factor, seed=seed, **all_kwargs)
+        if fname.endswith('.json'):
+            return JsonProblem(fname, model=model, scale_factor=scale_factor, seed=seed, **all_kwargs)
+        elif fname.endswith('.graphml'):
+            return TopologyZooProblem(fname, model=model, scale_factor=scale_factor, seed=seed, **all_kwargs)
     else:
         raise Exception('{} is not a valid topology'.format(prob_name))

@@ -179,7 +179,16 @@ def bottleneck_network(cap=10.0, epsilon=1e-3):
 
 
 def erdos_renyi(num_nodes, prob, seed=None):
-    return nx.erdos_renyi_graph(num_nodes, prob, seed=seed, directed=True)
+    G = nx.erdos_renyi_graph(num_nodes, prob, seed=seed, directed=False).to_directed()
+    largest_scc = []
+    for scc in nx.strongly_connected_component_subgraphs(G):
+        if len(scc) > len(largest_scc):
+            largest_scc = scc
+
+    G = nx.convert_node_labels_to_integers(largest_scc.copy())
+    for u, v in G.edges():
+        G[u][v]['capacity'] = 1000.0 # Set every link to have 1000 Mbps capacity
+    return G
 
 
 #################
@@ -229,9 +238,9 @@ if __name__ == '__main__':
         fname = 'dumbell-bottleneck.json'
 
     elif arg == 'erdos-renyi':
-        seed = np.random.randint(2**31 - 1)
-        G = erdos_renyi(1000, 0.01, seed=seed)
-        fname = 'erdos-renyi-{}'.format(seed)
+        seed = int(sys.argv[2]) if len(sys.argv) > 2 else np.random.randint(2**31 - 1)
+        G = erdos_renyi(1000, 0.005, seed=seed)
+        fname = 'erdos-renyi-{}.json'.format(seed)
 
     data = json_graph.node_link_data(G)
     write_graph_json(os.path.join(OUTPUT_DIR, fname), G)
