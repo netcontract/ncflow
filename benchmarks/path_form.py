@@ -27,7 +27,8 @@ HEADERS = [
     "num_paths",
     "edge_disjoint",
     "dist_metric",
-    "total_flow",
+    "objective",
+    "obj_val",
     "runtime",
 ]
 PLACEHOLDER = ",".join("{}" for _ in HEADERS)
@@ -41,7 +42,7 @@ def benchmark(problems):
         print_(",".join(HEADERS), file=results)
         for problem_name, topo_fname, tm_fname in problems:
             problem = Problem.from_file(topo_fname, tm_fname)
-            print_(problem.name, tm_fname)
+            print_(problem_name, tm_fname)
             traffic_seed = problem.traffic_matrix.seed
             total_demand = problem.total_demand
             print_("traffic seed: {}".format(traffic_seed))
@@ -53,7 +54,7 @@ def benchmark(problems):
 
             run_dir = os.path.join(
                 TOP_DIR,
-                problem.name,
+                problem_name,
                 "{}-{}".format(traffic_seed, problem.traffic_matrix.model),
             )
             if not os.path.exists(run_dir):
@@ -69,7 +70,7 @@ def benchmark(problems):
                     os.path.join(
                         run_dir,
                         "{}-path-formulation_{}-paths_edge-disjoint-{}_dist-metric-{}.txt".format(
-                            problem.name, num_paths, edge_disjoint, dist_metric
+                            problem_name, num_paths, edge_disjoint, dist_metric
                         ),
                     ),
                     "w",
@@ -86,7 +87,7 @@ def benchmark(problems):
                         os.path.join(
                             run_dir,
                             "{}-path-formulation_{}-paths_edge-disjoint-{}_dist-metric-{}_sol-dict.pkl".format(
-                                problem.name, num_paths, edge_disjoint, dist_metric
+                                problem_name, num_paths, edge_disjoint, dist_metric
                             ),
                         ),
                         "wb",
@@ -94,7 +95,7 @@ def benchmark(problems):
                         pickle.dump(pf_sol_dict, w)
 
                 result_line = PLACEHOLDER.format(
-                    problem.name,
+                    problem_name,
                     len(problem.G.nodes),
                     len(problem.G.edges),
                     traffic_seed,
@@ -106,6 +107,7 @@ def benchmark(problems):
                     num_paths,
                     edge_disjoint,
                     dist_metric,
+                    "max_flow",
                     pf.obj_val,
                     pf.runtime,
                 )
@@ -117,7 +119,7 @@ def benchmark(problems):
                         num_paths,
                         edge_disjoint,
                         dist_metric,
-                        problem.name,
+                        problem_name,
                         traffic_seed,
                         problem.traffic_matrix.model,
                     )
