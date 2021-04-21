@@ -5,7 +5,7 @@ from .utils import create_edges_onehot_dict, split_generic
 
 class GenericSplitter(AbstractPOPSplitter):
     def __init__(self, num_subproblems, pf, method='means', verbose=False):
-        super.__init__(num_subproblems)
+        super().__init__(num_subproblems)
         self._pf = pf
         self.verbose = verbose
         self.method = method

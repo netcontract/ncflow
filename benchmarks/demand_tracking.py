@@ -61,7 +61,7 @@ class PFWarmStart(object):
 
     @property
     def sol_dict(self):
-        return self.pf_warm.extract_sol_as_dict()
+        return self.pf_warm.sol_dict
 
     @property
     def name(self):
@@ -84,7 +84,7 @@ class PF(object):
 
     @property
     def sol_dict(self):
-        return self.pf.extract_sol_as_dict()
+        return self.pf.sol_dict
 
     @property
     def name(self):

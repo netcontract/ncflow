@@ -179,7 +179,8 @@ class SMORE(AbstractFormulation):
             return self._construct_smore_lp(self.problem.G, edge_to_paths,
                                            num_paths)
 
-    def extract_sol_as_dict(self):
+    @property
+    def sol_dict(self):
         if not hasattr(self, '_sol_dict'):
             sol_dict_def = defaultdict(list)
             for var in self.model.getVars():
@@ -204,7 +205,8 @@ class SMORE(AbstractFormulation):
 
         return self._sol_dict
 
-    def extract_sol_as_mat(self):
+    @property
+    def sol_mat(self):
         edge_idx = self.problem.edge_idx
         sol_mat = np.zeros((len(edge_idx), len(self._path_to_commod)),
                            dtype=np.float32)
@@ -224,7 +226,7 @@ class SMORE(AbstractFormulation):
         if self._objective == Objective.MAX_FLOW:
             return self.obj_val
         else:
-            sol_dict = self.extract_sol_as_dict()
+            sol_dict = self.sol_dict()
             total_flow = 0.0
             for commod_key in self.problem.commodity_list:
                 flow_list = sol_dict[commod_key]

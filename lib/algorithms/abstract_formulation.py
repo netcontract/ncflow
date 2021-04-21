@@ -43,23 +43,30 @@ class AbstractFormulation(object):
     def model(self):
         return self._solver.model
 
-    def extract_sol_as_dict(self):
+    @property
+    def sol_dict(self):
         raise NotImplementedError(
-            'extract_sol_as_dict needs to be implemented in the subclass: {}'.
-            format(self.__class__))
+            "sol_dict needs to be implemented in the subclass: {}".format(
+                self.__class__
+            )
+        )
 
-    def extract_sol_as_mat(self):
+    @property
+    def sol_mat(self):
         raise NotImplementedError(
-            'extract_sol_as_mat needs to be implemented in the subclass: {}'.
-            format(self.__class__))
+            "sol_mat needs to be implemented in the subclass: {}".format(
+                self.__class__
+            )
+        )
+
     ##########################
     # Private helper methods #
     ##########################
     def _print(self, *args):
         print(*args, file=self.out)
 
-    def _extract_inds_from_var_name(self, varName, var_group_name='f'):
-        match = re.match(r'{}\[(\d+),(\d+)\]'.format(var_group_name), varName)
+    def _extract_inds_from_var_name(self, varName, var_group_name="f"):
+        match = re.match(r"{}\[(\d+),(\d+)\]".format(var_group_name), varName)
         return int(match.group(1)), int(match.group(2))
 
     def _create_sol_dict(self, sol_dict_def, commodity_list):
@@ -77,27 +84,29 @@ class AbstractFormulation(object):
 
     def _construct_lp(self, fixed_total_flows=[]):
         raise NotImplementedError(
-            '_construct_lp needs to be implemented in the subclass: {}'.format(
-                self.__class__))
+            "_construct_lp needs to be implemented in the subclass: {}".format(
+                self.__class__
+            )
+        )
 
     def _save_pkl(self, obj, fname):
-        if fname.endswith('.pkl'):
-            with open(fname, 'wb') as w:
+        if fname.endswith(".pkl"):
+            with open(fname, "wb") as w:
                 pickle.dump(obj, w)
 
     def _save_txt(self, obj, fname):
-        if fname.endswith('.txt'):
-            with open(fname, 'w') as w:
+        if fname.endswith(".txt"):
+            with open(fname, "w") as w:
                 print(obj, file=w)
 
     @property
     def runtime(self):
         raise NotImplementedError(
-            'runtime needs to be implemented in the subclass: {}'.format(
-                self.__class__))
+            "runtime needs to be implemented in the subclass: {}".format(self.__class__)
+        )
 
     @property
     def obj_val(self):
         raise NotImplementedError(
-            'obj_val needs to be implemented in the subclass: {}'.format(
-                self.__class__))
+            "obj_val needs to be implemented in the subclass: {}".format(self.__class__)
+        )

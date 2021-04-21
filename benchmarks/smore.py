@@ -50,7 +50,7 @@ def benchmark(problems):
                         'w') as log:
                     smore = SMORE.new_max_flow(num_paths=4, out=log)
                     smore.solve(problem)
-                    smore_sol_dict = smore.extract_sol_as_dict()
+                    smore_sol_dict = smore.sol_dict
                     pickle.dump(
                         smore_sol_dict,
                         open(

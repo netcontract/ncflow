@@ -7,7 +7,7 @@ from math import floor
 
 class BaselineSplitter(AbstractPOPSplitter):
     def __init__(self, num_subproblems):
-        super.__init__(num_subproblems)
+        super().__init__(num_subproblems)
 
     def split(self, problem):
         sub_problems = []

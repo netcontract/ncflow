@@ -61,7 +61,7 @@ def benchmark(problems):
                         dist_metric=dist_metric,
                         out=log)
                     pf.solve(problem)
-                    pf_sol_dict = pf.extract_sol_as_dict()
+                    pf_sol_dict = pf.sol_dict
                     with open(
                             os.path.join(
                                 run_dir,

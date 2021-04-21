@@ -9,7 +9,7 @@ class SmartSplitter(AbstractPOPSplitter):
     #             where a path is a list of sequential nodes
     #             use lib.graph_utils.path_to_edge_list to get edges.
     def __init__(self, num_subproblems, paths_dict):
-        super.__init__(num_subproblems)
+        super().__init__(num_subproblems)
         self._paths_dict = paths_dict
 
     def split(self, problem):

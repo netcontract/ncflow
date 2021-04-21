@@ -33,8 +33,6 @@ def benchmark(problems):
 
     with open(OUTPUT_CSV, 'a') as results:
         print_(','.join(HEADERS), file=results)
-        all_obj_vals = []
-        all_runtimes = []
         for problem_name, topo_fname, tm_fname in problems:
             problem = Problem.from_file(topo_fname, tm_fname)
             print_(problem.name, tm_fname)
@@ -122,8 +120,6 @@ def benchmark(problems):
                             r2_runtime, recon_runtime, r3_runtime,
                             kirchoffs_runtime)
                         print_(result_line, file=results)
-                    all_obj_vals.append(ncflow.obj_val)
-                    all_runtimes.append(ncflow.runtime_est(28))
 		
             except:
                 print_(

@@ -3,7 +3,7 @@ import random
 # assign commodities to subproblems at random
 class RandomSplitter(AbstractPOPSplitter):
     def __init__(self, num_subproblems):
-        super.__init__(num_subproblems)
+        super().__init__(num_subproblems)
 
     def split(self, problem):
         sub_problems = [problem.copy() for _ in range(self._num_subproblems)]

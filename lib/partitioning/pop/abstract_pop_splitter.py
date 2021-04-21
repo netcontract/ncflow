@@ -2,7 +2,7 @@
 
 class AbstractPOPSplitter(object):
 
-    def __init__(self, *, num_subproblems):
+    def __init__(self, num_subproblems):
         self._num_subproblems = num_subproblems
 
     #################
