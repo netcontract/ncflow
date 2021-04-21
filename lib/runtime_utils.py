@@ -2,6 +2,7 @@ from heapq import heappush, heappop
 
 VERBOSE = False
 
+
 def heapsched_rt(lrts, k):
     h = []
     for rt in lrts[:k]:
@@ -16,6 +17,7 @@ def heapsched_rt(lrts, k):
         curr_rt = heappop(h)
 
     return curr_rt
+
 
 def parallelized_rt(lrts, k):
     if len(lrts) == 0:

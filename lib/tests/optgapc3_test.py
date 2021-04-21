@@ -8,15 +8,15 @@ from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 # Here, a flow has multiple bottlenecks in different meta-nodes and
 # flows that share only one of those bottlenecks lose flow; leading to optimality gap.
 
-class OptGapC3Test(AbstractTest):
 
+class OptGapC3Test(AbstractTest):
     def __init__(self):
         super().__init__()
         self.problem = OptGapC3()
 
     @property
     def name(self):
-        return 'optgapc3'
+        return "optgapc3"
 
     def run(self):
         ncf = NcfEpi.new_max_flow(4)

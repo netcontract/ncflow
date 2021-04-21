@@ -5,14 +5,13 @@ from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 
 
 class SingleEdgeBTest(AbstractTest):
-
     def __init__(self):
         super().__init__()
         self.problem = SingleEdgeB()
 
     @property
     def name(self):
-        return 'SingleEdgeB'
+        return "SingleEdgeB"
 
     def run(self):
         ncf = NcfEpi.new_max_flow(4, verbose=True)

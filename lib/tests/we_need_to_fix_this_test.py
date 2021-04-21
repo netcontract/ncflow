@@ -7,14 +7,13 @@ from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 # Testing WeNeedToFixThis: correct path to target
 # isn't visible in source meta-node
 class WeNeedToFixThisTest(AbstractTest):
-
     def __init__(self):
         super().__init__()
         self.problem = WeNeedToFixThis()
 
     @property
     def name(self):
-        return 'we-need-to-fix-this'
+        return "we-need-to-fix-this"
 
     def run(self):
         ncf = NcfEpi.new_max_flow(4)
@@ -22,4 +21,3 @@ class WeNeedToFixThisTest(AbstractTest):
         ncf.solve(self.problem, hc)
 
         self.assert_feasibility(ncf)
-

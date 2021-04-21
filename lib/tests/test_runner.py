@@ -19,31 +19,44 @@ from .abstract_test import bcolors
 import argparse
 
 
-ALL_TESTS = [ToyProblemTest(), ReconciliationProblemTest(),
-             ReconciliationProblem2Test(), Recon3Test(), OptGapC1Test(),
-             OptGapC2Test(), OptGapC3Test(), FeasibilityTest(),
-             OptGap4Test(), FlowPathConstructionTest(), WeNeedToFixThisTest(),
-             SingleEdgeBTest()]
+ALL_TESTS = [
+    ToyProblemTest(),
+    ReconciliationProblemTest(),
+    ReconciliationProblem2Test(),
+    Recon3Test(),
+    OptGapC1Test(),
+    OptGapC2Test(),
+    OptGapC3Test(),
+    FeasibilityTest(),
+    OptGap4Test(),
+    FlowPathConstructionTest(),
+    WeNeedToFixThisTest(),
+    SingleEdgeBTest(),
+]
 TEST_NAME_DICT = {test.name: test for test in ALL_TESTS}
 
 
 def run_tests(tests_to_run):
     tests_that_failed = []
     for test in tests_to_run:
-        print('\n\n---{} TEST---\n\n'.format(test.name.upper()))
+        print("\n\n---{} TEST---\n\n".format(test.name.upper()))
         test.run()
         if test.has_error:
             tests_that_failed.append(test)
     for test in tests_that_failed:
         print()
-        print(bcolors.ERROR + '\n\n---{} TEST failed---\n\n'.format(test.name.upper()) + bcolors.ENDC)
+        print(
+            bcolors.ERROR
+            + "\n\n---{} TEST failed---\n\n".format(test.name.upper())
+            + bcolors.ENDC
+        )
     if len(tests_that_failed) == 0:
-        print(bcolors.OKGREEN + 'All tests passed!' + bcolors.ENDC)
+        print(bcolors.OKGREEN + "All tests passed!" + bcolors.ENDC)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--tests', nargs='+', required=False)
+    parser.add_argument("--tests", nargs="+", required=False)
     args = parser.parse_args()
 
     if args.tests is not None:
@@ -51,7 +64,7 @@ if __name__ == '__main__':
     else:
         tests_to_run = ALL_TESTS
 
-    print('RUNNING THE FOLLOWING TESTS: {}'.format(
-        [test.name for test in tests_to_run]))
+    print(
+        "RUNNING THE FOLLOWING TESTS: {}".format([test.name for test in tests_to_run])
+    )
     run_tests(tests_to_run)
-

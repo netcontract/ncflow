@@ -41,10 +41,7 @@ EPS2 = 1e-2
 class EdgeFormulation(AbstractFormulation):
     @classmethod
     def new_max_flow(cls, out=None):
-        return cls(objective=Objective.MAX_FLOW,
-                   DEBUG=True,
-                   VERBOSE=True,
-                   out=out)
+        return cls(objective=Objective.MAX_FLOW, DEBUG=True, VERBOSE=True, out=out)
 
     def __init__(self, objective, *, DEBUG, VERBOSE, out=None):
         super().__init__(objective, DEBUG, VERBOSE, out)
@@ -58,23 +55,38 @@ class EdgeFormulation(AbstractFormulation):
         M = len(self.problem.G.edges)  # number of edges
         K = len(self.problem.commodity_list)  # number of commodity flows
 
-        eps = EPS / (M * max(
-            [c_e if c_e else 0.0 for _, _, c_e in self.problem.G.edges.data('capacity')]))
+        eps = EPS / (
+            M
+            * max(
+                [
+                    c_e if c_e else 0.0
+                    for _, _, c_e in self.problem.G.edges.data("capacity")
+                ]
+            )
+        )
         # if at least one edge has a non-zero weight, then we need to include the
         # weights as part of our objective function later on
         max_weight = max(
-            [w if w else 0.0 for _, _, w in self.problem.G.edges.data('weight')])
+            [w if w else 0.0 for _, _, w in self.problem.G.edges.data("weight")]
+        )
         if max_weight > 0.0:
-            eps2 = EPS2 / (EPS2**-1 + (M * max_weight))
+            eps2 = EPS2 / (EPS2 ** -1 + (M * max_weight))
 
         if debug_log:
-            print("to create vars; M(#edges)=", M, " K(#commods)=", K, " now: ", datetime.datetime.now())
-        self.vars = m.addVars(M, K, vtype=GRB.CONTINUOUS, lb=0.0, name='f')
+            print(
+                "to create vars; M(#edges)=",
+                M,
+                " K(#commods)=",
+                K,
+                " now: ",
+                datetime.datetime.now(),
+            )
+        self.vars = m.addVars(M, K, vtype=GRB.CONTINUOUS, lb=0.0, name="f")
 
         if debug_log:
             print("fin: add vars", " now: ", datetime.datetime.now())
 
-        self.edges_list = list(self.problem.G.edges.data('capacity'))
+        self.edges_list = list(self.problem.G.edges.data("capacity"))
 
         if self.DEBUG:
             from functools import partial
@@ -85,32 +97,49 @@ class EdgeFormulation(AbstractFormulation):
                 k, (s_k, t_k, d_k) = c_l[k]
                 return u, v, k, s_k, t_k, d_k
 
-            self.debug_fn = partial(_debug_fn, self.edges_list, self.problem.commodity_list)
+            self.debug_fn = partial(
+                _debug_fn, self.edges_list, self.problem.commodity_list
+            )
         else:
             self.debug_fn = None
 
         # Set objective
         if self._objective == Objective.MAX_FLOW:
-            self._print('MAX FLOW objective')
-            obj = quicksum([
-                # TODO: create a mapping instead of using enumerate
-                self.vars[e, k]
-                for k, (_, (s_k, _, d_k)) in enumerate(self.problem.commodity_list)
-                for e, (src, _) in enumerate(self.problem.G.edges()) if src == s_k
-            ]) - eps * self.vars.sum()
+            self._print("MAX FLOW objective")
+            obj = (
+                quicksum(
+                    [
+                        # TODO: create a mapping instead of using enumerate
+                        self.vars[e, k]
+                        for k, (_, (s_k, _, d_k)) in enumerate(
+                            self.problem.commodity_list
+                        )
+                        for e, (src, _) in enumerate(self.problem.G.edges())
+                        if src == s_k
+                    ]
+                )
+                - eps * self.vars.sum()
+            )
             if max_weight > 0.0:
-                obj -= eps2 * quicksum([
-                    self.edges_list[e][-1]['weight'] * self.vars[e, k]
-                    for e in range(M) for k in range(K)
-                ])
+                obj -= eps2 * quicksum(
+                    [
+                        self.edges_list[e][-1]["weight"] * self.vars[e, k]
+                        for e in range(M)
+                        for k in range(K)
+                    ]
+                )
         elif self._objective == Objective.MAX_MIN_FAIRNESS:
-            self._print('MAX MIN FAIRNESS objective')
+            self._print("MAX MIN FAIRNESS objective")
             # constraints for max-min fairness
             # sum_{v}^{V} (f_k(s_k, v)) >= \alpha for k
-            self.alpha = m.addVar(vtype=GRB.CONTINUOUS, lb=0.0, ub=1.0, name='a')
+            self.alpha = m.addVar(vtype=GRB.CONTINUOUS, lb=0.0, ub=1.0, name="a")
             m.update()
             for k, (_, (s_k, _, d_k)) in enumerate(self.problem.commodity_list):
-                constr_vars = [self.vars[e, k] for e, (src, _) in enumerate(self.problem.G.edges()) if src == s_k]
+                constr_vars = [
+                    self.vars[e, k]
+                    for e, (src, _) in enumerate(self.problem.G.edges())
+                    if src == s_k
+                ]
                 m.addConstr(quicksum(constr_vars) / d_k >= self.alpha)
             obj = self.alpha
 
@@ -119,8 +148,10 @@ class EdgeFormulation(AbstractFormulation):
             print("fin: set obj", " now: ", datetime.datetime.now())
 
         # Edge capacity constraints
-        m.addConstrs(self.vars.sum(e, '*') <= c_e
-            for e, (_, _, c_e) in enumerate(self.problem.G.edges.data('capacity')))
+        m.addConstrs(
+            self.vars.sum(e, "*") <= c_e
+            for e, (_, _, c_e) in enumerate(self.problem.G.edges.data("capacity"))
+        )
         if debug_log:
             print("fin: cap constr", " now: ", datetime.datetime.now())
 
@@ -138,15 +169,18 @@ class EdgeFormulation(AbstractFormulation):
 
             for n in self.problem.G.nodes():
                 if n != src and n != target:
-                    m.addConstr(
-                        quicksum(flow_out[n]) - quicksum(flow_in[n]) == 0)
+                    m.addConstr(quicksum(flow_out[n]) - quicksum(flow_in[n]) == 0)
         if debug_log:
-            print("fin: demand cap and flow conservation", " now: ", datetime.datetime.now())
+            print(
+                "fin: demand cap and flow conservation",
+                " now: ",
+                datetime.datetime.now(),
+            )
 
         edge_idx = {edge: e for e, edge in enumerate(self.problem.G.edges)}
         for edge, total_flow in fixed_total_flows:
             e = edge_idx[edge]
-            m.addConstr(self.vars.sum(e, '*') == total_flow)
+            m.addConstr(self.vars.sum(e, "*") == total_flow)
         if debug_log:
             print("fin: fixed flows", " now: ", datetime.datetime.now())
 
@@ -156,7 +190,7 @@ class EdgeFormulation(AbstractFormulation):
 
         l = []
         for var in self.model.getVars():
-            if var.varName.startswith('f[') and var.x != 0.0:
+            if var.varName.startswith("f[") and var.x != 0.0:
                 e, sol_k = self._extract_inds_from_var_name(var.varName)
                 u, v, _ = self.edges_list[e]
                 true_k, (s_k, t_k, d_k) = self.problem.commodity_list[sol_k]
@@ -189,8 +223,11 @@ class EdgeFormulation(AbstractFormulation):
     def extract_sol_as_mat(self):
         edge_idx = {edge: e for e, edge in enumerate(self.problem.G.edges)}
 
-        l = [(self._extract_inds_from_var_name(var.varName), var.x)
-             for var in self._solver.model.getVars() if var.varName.startswith('f[')]
+        l = [
+            (self._extract_inds_from_var_name(var.varName), var.x)
+            for var in self._solver.model.getVars()
+            if var.varName.startswith("f[")
+        ]
         inds, vals = zip(*l)
         row_inds, col_inds = zip(*inds)
         mat = np.zeros((max(row_inds) + 1, max(col_inds) + 1))

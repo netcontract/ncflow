@@ -3,15 +3,15 @@ from ..problems import Recon3
 from ..partitioning.hard_coded_partitioning import HardCodedPartitioning
 from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 
-class Recon3Test(AbstractTest):
 
+class Recon3Test(AbstractTest):
     def __init__(self):
         super().__init__()
         self.problem = Recon3()
 
     @property
     def name(self):
-        return 'recon3'
+        return "recon3"
 
     def run(self):
         ncf = NcfEpi.new_max_flow(4)

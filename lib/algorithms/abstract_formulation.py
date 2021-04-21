@@ -54,9 +54,7 @@ class AbstractFormulation(object):
     @property
     def sol_mat(self):
         raise NotImplementedError(
-            "sol_mat needs to be implemented in the subclass: {}".format(
-                self.__class__
-            )
+            "sol_mat needs to be implemented in the subclass: {}".format(self.__class__)
         )
 
     ##########################

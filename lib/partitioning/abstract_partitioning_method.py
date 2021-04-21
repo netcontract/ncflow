@@ -2,7 +2,6 @@ import numpy as np
 
 
 class AbstractPartitioningMethod(object):
-
     def __init__(self, *, num_partitions=None, weighted=True):
         if isinstance(num_partitions, int):
             self._num_partitions = num_partitions
@@ -10,8 +9,7 @@ class AbstractPartitioningMethod(object):
         self._use_cache = True
         self._weighted = weighted
 
-        self._best_partitions = {
-        }
+        self._best_partitions = {}
 
     @property
     def use_cache(self):
@@ -41,7 +39,7 @@ class AbstractPartitioningMethod(object):
 
     @property
     def num_partitions(self):
-        if not hasattr(self, '_num_partitions'):
+        if not hasattr(self, "_num_partitions"):
             return -1
         return self._num_partitions
 
@@ -54,7 +52,11 @@ class AbstractPartitioningMethod(object):
         return int(np.sqrt(len(G.nodes)))
 
     def partition(self, problem, override_cache=False):
-        if not override_cache and self._use_cache and problem.name in self._best_partitions:
+        if (
+            not override_cache
+            and self._use_cache
+            and problem.name in self._best_partitions
+        ):
             return self._best_partitions[problem.name]
 
         self._partition_vector = self._partition_impl(problem)
@@ -67,10 +69,12 @@ class AbstractPartitioningMethod(object):
     @property
     def name(self):
         raise NotImplementedError(
-            'name needs to be implemented in the subclass: {}'.format(
-                self.__class__))
+            "name needs to be implemented in the subclass: {}".format(self.__class__)
+        )
 
     def _partition_impl(self, problem):
         raise NotImplementedError(
-            '_partition_impl needs to be implemented in the subclass: {}'.format(
-                self.__class__))
+            "_partition_impl needs to be implemented in the subclass: {}".format(
+                self.__class__
+            )
+        )

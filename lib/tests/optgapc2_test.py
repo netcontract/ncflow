@@ -8,15 +8,15 @@ from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 # Here, a flow has two paths but R1 picks one and only in R2 is the
 # bottleneck discovered leading to lost flow
 
-class OptGapC2Test(AbstractTest):
 
+class OptGapC2Test(AbstractTest):
     def __init__(self):
         super().__init__()
         self.problem = OptGapC2()
 
     @property
     def name(self):
-        return 'optgapc2'
+        return "optgapc2"
 
     def run(self):
         ncf = NcfEpi.new_max_flow(4)

@@ -12,17 +12,19 @@ from networkx.algorithms.community import coverage as cov
 # capacity is retained. (No other graph metadata is serialized.)
 def serialize_to_graphml_for_gephi(prob, p_v):
     G = nx.DiGraph()
-    for node, pos in prob.G.nodes.data('pos'):
+    for node, pos in prob.G.nodes.data("pos"):
         if pos is not None:
             G.add_node(node, id=p_v[node], latitude=pos[0], longitude=pos[1])
         else:
             G.add_node(node, id=p_v[node])
 
     for u, v, data in prob.G.edges.data():
-        G.add_edge(u, v, capacity = data['capacity'])
+        G.add_edge(u, v, capacity=data["capacity"])
 
     G = G.to_undirected()
-    nx.write_graphml(G, prob.name.replace('.dot', '.graphml').replace('.json', '.graphml'))
+    nx.write_graphml(
+        G, prob.name.replace(".dot", ".graphml").replace(".json", ".graphml")
+    )
 
 
 def to_np_arr(arr):
@@ -31,7 +33,9 @@ def to_np_arr(arr):
 
 def coverage(prob, p_v):
     def convert_to_list_of_sets(p_v):
-        return [set(np.argwhere(p_v == part_id).flatten()) for part_id in np.unique(p_v)]
+        return [
+            set(np.argwhere(p_v == part_id).flatten()) for part_id in np.unique(p_v)
+        ]
 
     return cov(prob.G, convert_to_list_of_sets(p_v))
 
@@ -57,9 +61,8 @@ def all_partitions_contiguous(prob, p_v):
     partition_vector = to_np_arr(p_v)
     for k in np.unique(partition_vector):
         if not is_partition_valid(
-                prob,
-                prob.G.subgraph(
-                    np.argwhere(partition_vector == k).flatten())):
+            prob, prob.G.subgraph(np.argwhere(partition_vector == k).flatten())
+        ):
             print(k)
             return False
     return True
@@ -73,9 +76,9 @@ def count_meta_edges(G, p_v):
     for u, part_id in enumerate(partition_vector):
         for v in G.successors(u):
             if partition_vector[v] != part_id:
-                print('({}, {})'.format(u, v))
+                print("({}, {})".format(u, v))
                 edge_cut_counts[part_id] += 1
-                edge_cut_capacities[part_id] += G[u][v]['capacity']
+                edge_cut_capacities[part_id] += G[u][v]["capacity"]
     return dict(edge_cut_counts), dict(edge_cut_capacities)
 
 
@@ -102,23 +105,23 @@ def compute_total_intra_and_inter_flow(p_v, sol_dict):
 # 3) avg # of meta-edges
 # 4) max #  of meta-edges
 # 5) Bayesian Information Criterion
-def find_best_k(partition_constructor, problem, method='bic'):
+def find_best_k(partition_constructor, problem, method="bic"):
     G = problem.G
 
-    if method == 'bic':
+    if method == "bic":
         k = 1
         best_k = k
         best_p_v = None
         best_bic = -999999999999999
         while k < int(len(G.nodes) / 2):
-            print('Best K: ', best_k)
-            print('Best BIC: ', best_bic)
+            print("Best K: ", best_k)
+            print("Best BIC: ", best_bic)
             print()
             k += 1
             partitioner = partition_constructor(num_partitions=k)
             p_v = partitioner.partition(problem)
             if not all_partitions_contiguous(problem.G, p_v):
-                print('{} not continguous'.format(k))
+                print("{} not continguous".format(k))
                 print()
                 continue
 
@@ -144,7 +147,7 @@ def find_best_k(partition_constructor, problem, method='bic'):
             partitioner = partition_constructor(num_partitions=k)
             p_v = partitioner.partition(problem)
             if not all_partitions_contiguous(G, p_v):
-                print('{} not contiguous'.format(k))
+                print("{} not contiguous".format(k))
                 print()
                 continue
             # nodes_per_meta_node = count_nodes_per_meta_node(p_v)
@@ -154,36 +157,34 @@ def find_best_k(partition_constructor, problem, method='bic'):
             # avg_nodes_per_meta_node = np.mean(nodes_per_meta_node)
             # median_meta_edges = np.median(edge_cut_counts)
 
-            print('Best K: ', best_k)
-            print('Min score: ', min_score)
+            print("Best K: ", best_k)
+            print("Min score: ", min_score)
             # print('Avg number of nodes per meta-node:', avg_nodes_per_meta_node)
             # print('local flow / avg nodes per meta-node:', local_flow / avg_nodes_per_meta_node)
             # print('non-local flow / total meta-edge capacity:', non_local_flow / np.sum(edge_cut_caps))
             # print('Avg number of meta-edges between meta-nodes:', mean_meta_edges)
             print()
-            if method == 'mean':
-                edge_cut_counts_dict, edge_cut_caps_dict = count_meta_edges(
-                    G, p_v)
+            if method == "mean":
+                edge_cut_counts_dict, edge_cut_caps_dict = count_meta_edges(G, p_v)
                 edge_cut_counts = list(edge_cut_counts_dict.values())
                 mean_meta_edges = np.mean(edge_cut_counts)
                 if mean_meta_edges <= min_score:
                     min_score = mean_meta_edges
                     best_k = k
                     best_p_v = p_v
-            elif method == 'max':
-                edge_cut_counts_dict, edge_cut_caps_dict = count_meta_edges(
-                    G, p_v)
+            elif method == "max":
+                edge_cut_counts_dict, edge_cut_caps_dict = count_meta_edges(G, p_v)
                 edge_cut_counts = list(edge_cut_counts_dict.values())
                 max_meta_edges = np.max(edge_cut_counts)
-                print('k: {}, max: {}'.format(k, max_meta_edges))
+                print("k: {}, max: {}".format(k, max_meta_edges))
                 print()
                 if max_meta_edges <= min_score:
                     min_score = max_meta_edges
                     best_k = k
                     best_p_v = p_v
-            elif method == 'intra':
+            elif method == "intra":
                 pass
-            elif method == 'inter':
+            elif method == "inter":
                 pass
 
         return best_k, best_p_v, min_score

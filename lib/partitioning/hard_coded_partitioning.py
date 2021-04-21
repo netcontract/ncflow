@@ -9,8 +9,7 @@ class HardCodedPartitioning(AbstractPartitioningMethod):
         else:
             _partition_vector = partition_vector
 
-        super().__init__(num_partitions=max(partition_vector) + 1,
-                         weighted=False)
+        super().__init__(num_partitions=max(partition_vector) + 1, weighted=False)
         self._use_cache = False
         self._partition_vector = _partition_vector
 

@@ -11,7 +11,7 @@ import os
 import pickle
 import sys
 
-PATHS_DIR = os.path.join(TOPOLOGIES_DIR, 'paths', 'raeke')
+PATHS_DIR = os.path.join(TOPOLOGIES_DIR, "paths", "raeke")
 
 
 # TODO: this should probably be a subclass of PathFormulation, but not
@@ -19,32 +19,33 @@ PATHS_DIR = os.path.join(TOPOLOGIES_DIR, 'paths', 'raeke')
 class SMORE(AbstractFormulation):
     @classmethod
     def new_max_link_util(cls, num_paths, out=sys.stdout):
-        return cls(objective=Objective.MIN_MAX_LINK_UTIL,
-                   num_paths=num_paths,
-                   DEBUG=True,
-                   VERBOSE=False,
-                   out=out)
+        return cls(
+            objective=Objective.MIN_MAX_LINK_UTIL,
+            num_paths=num_paths,
+            DEBUG=True,
+            VERBOSE=False,
+            out=out,
+        )
 
     @classmethod
     def new_max_flow(cls, num_paths, out=sys.stdout):
-        return cls(objective=Objective.MAX_FLOW,
-                   num_paths=num_paths,
-                   DEBUG=True,
-                   VERBOSE=False,
-                   out=out)
+        return cls(
+            objective=Objective.MAX_FLOW,
+            num_paths=num_paths,
+            DEBUG=True,
+            VERBOSE=False,
+            out=out,
+        )
 
     def __init__(self, *, objective, num_paths, DEBUG, VERBOSE, out=None):
         super().__init__(objective, DEBUG, VERBOSE, out)
         self._num_paths = num_paths
 
     def _construct_max_flow_lp(self, G, edge_to_paths, num_total_paths):
-        m = Model('max-flow')
+        m = Model("max-flow")
 
         # Create variables: one for each path
-        path_vars = m.addVars(num_total_paths,
-                              vtype=GRB.CONTINUOUS,
-                              lb=0.0,
-                              name='f')
+        path_vars = m.addVars(num_total_paths, vtype=GRB.CONTINUOUS, lb=0.0, name="f")
 
         obj = quicksum(path_vars)
         m.setObjective(obj, GRB.MAXIMIZE)
@@ -56,24 +57,21 @@ class SMORE(AbstractFormulation):
             m.addConstr(quicksum(path_vars[p] for p in path_inds) <= d_k)
 
         # Add edge capacity constraints
-        for u, v, c_e in G.edges.data('capacity'):
+        for u, v, c_e in G.edges.data("capacity"):
             paths = edge_to_paths[(u, v)]
             constr_vars = [path_vars[p] for p in paths]
             m.addConstr(quicksum(constr_vars) <= c_e)
 
         return LpSolver(m, None, self.DEBUG, self.VERBOSE, self.out)
 
-
     def _construct_smore_lp(self, G, edge_to_paths, num_total_paths):
-        m = Model('min-edge-util')
+        m = Model("min-edge-util")
 
         # Create variables: one for each path
-        path_vars = m.addVars(num_total_paths,
-                              vtype=GRB.CONTINUOUS,
-                              lb=0.0,
-                              ub=1.0,
-                              name='f')
-        max_link_util_var = m.addVar(vtype=GRB.CONTINUOUS, lb=0.0, name='z')
+        path_vars = m.addVars(
+            num_total_paths, vtype=GRB.CONTINUOUS, lb=0.0, ub=1.0, name="f"
+        )
+        max_link_util_var = m.addVar(vtype=GRB.CONTINUOUS, lb=0.0, name="z")
         m.update()
         m.setObjective(max_link_util_var, GRB.MINIMIZE)
 
@@ -82,20 +80,27 @@ class SMORE(AbstractFormulation):
             m.addConstr(quicksum(path_vars[p] for p in path_ids) == 1)
 
         # Add edge util constraints
-        for u, v, c_e in G.edges.data('capacity'):
+        for u, v, c_e in G.edges.data("capacity"):
             paths = edge_to_paths[(u, v)]
-            constr_vars = [path_vars[p] * self.commodities[self._path_to_commod[p]][-2] for p in paths]
+            constr_vars = [
+                path_vars[p] * self.commodities[self._path_to_commod[p]][-2]
+                for p in paths
+            ]
             m.addConstr(quicksum(constr_vars) / c_e <= max_link_util_var)
 
         return LpSolver(m, None, self.DEBUG, self.VERBOSE, self.out)
 
     @staticmethod
     def paths_full_fname_txt(problem, num_paths):
-        return os.path.join(PATHS_DIR, '{}-{}-paths-rrt.txt'.format(problem.name, num_paths))
+        return os.path.join(
+            PATHS_DIR, "{}-{}-paths-rrt.txt".format(problem.name, num_paths)
+        )
 
     @staticmethod
     def paths_full_fname_pkl(problem, num_paths):
-        return os.path.join(PATHS_DIR, '{}-{}-paths-rrt.pkl'.format(problem.name, num_paths))
+        return os.path.join(
+            PATHS_DIR, "{}-{}-paths-rrt.pkl".format(problem.name, num_paths)
+        )
 
     ###############################
     # Override superclass methods #
@@ -108,41 +113,41 @@ class SMORE(AbstractFormulation):
         paths_fname_pkl = SMORE.paths_full_fname_pkl(problem, self._num_paths)
 
         if os.path.exists(paths_fname_pkl):
-            self._print('Loading Raeke paths from pickle file', paths_fname_pkl)
-            with open(paths_fname_pkl, 'rb') as r:
+            self._print("Loading Raeke paths from pickle file", paths_fname_pkl)
+            with open(paths_fname_pkl, "rb") as r:
                 paths_dict = pickle.load(r)
         else:
-            self._print('Loading Raeke paths from text file', paths_fname_txt)
+            self._print("Loading Raeke paths from text file", paths_fname_txt)
             try:
-                with open(paths_fname_txt, 'r') as f:
+                with open(paths_fname_txt, "r") as f:
                     new_src_and_sink = True
                     src, target = None, None
                     paths_dict = {}
                     for line in f:
                         line = line.strip()
-                        if line == '':
+                        if line == "":
                             new_src_and_sink = True
                             continue
                         if new_src_and_sink:
-                            parts = line[:-2].split(' -> ')
+                            parts = line[:-2].split(" -> ")
                             src, target = int(parts[0][1:]), int(parts[1][1:])
                             paths_dict[(src, target)] = []
                             new_src_and_sink = False
                         else:
                             path = [src]
-                            path_str = line[1:line.rindex(']')]
-                            for edge_str in path_str.split(', '):
-                                v = int(edge_str.split(',')[-1][1:-1])
+                            path_str = line[1 : line.rindex("]")]
+                            for edge_str in path_str.split(", "):
+                                v = int(edge_str.split(",")[-1][1:-1])
                                 path.append(v)
 
                             paths_dict[(src, target)].append(remove_cycles(path))
 
-                self._print('Saving Raeke paths to pickle file')
-                with open(paths_fname_pkl, 'wb') as w:
+                self._print("Saving Raeke paths to pickle file")
+                with open(paths_fname_pkl, "wb") as w:
                     pickle.dump(paths_dict, w)
 
             except FileNotFoundError as e:
-                self._print('Unable to find {}'.format(paths_fname_txt))
+                self._print("Unable to find {}".format(paths_fname_txt))
                 raise e
 
         self.commodities = []
@@ -165,33 +170,36 @@ class SMORE(AbstractFormulation):
                 path_i += 1
 
             self.commodities.append((k, d_k, path_ids))
-        self._print('pre_solve done')
+        self._print("pre_solve done")
         return edge_to_paths, path_i
 
     def _construct_lp(self, sat_flows=[]):
         edge_to_paths, num_paths = self.pre_solve()
         if self._objective == Objective.MAX_FLOW:
-            self._print('Constructing Max Flow LP')
-            return self._construct_max_flow_lp(self.problem.G, edge_to_paths,
-                                           num_paths)
+            self._print("Constructing Max Flow LP")
+            return self._construct_max_flow_lp(self.problem.G, edge_to_paths, num_paths)
         elif self._objective == Objective.MIN_MAX_LINK_UTIL:
-            self._print('Constructing SMORE LP')
-            return self._construct_smore_lp(self.problem.G, edge_to_paths,
-                                           num_paths)
+            self._print("Constructing SMORE LP")
+            return self._construct_smore_lp(self.problem.G, edge_to_paths, num_paths)
 
     @property
     def sol_dict(self):
-        if not hasattr(self, '_sol_dict'):
+        if not hasattr(self, "_sol_dict"):
             sol_dict_def = defaultdict(list)
             for var in self.model.getVars():
-                if var.varName.startswith('f[') and var.x != 0.0:
-                    match = re.match(r'f\[(\d+)\]', var.varName)
+                if var.varName.startswith("f[") and var.x != 0.0:
+                    match = re.match(r"f\[(\d+)\]", var.varName)
                     p = int(match.group(1))
                     commod_key = self.problem.commodity_list[self._path_to_commod[p]]
                     d_k = commod_key[-1][-1]
-                    flow_val = var.x*d_k if self._objective == Objective.MIN_MAX_LINK_UTIL else var.x
-                    sol_dict_def[commod_key] += [(edge, flow_val)
-                            for edge in path_to_edge_list(self._all_paths[p])
+                    flow_val = (
+                        var.x * d_k
+                        if self._objective == Objective.MIN_MAX_LINK_UTIL
+                        else var.x
+                    )
+                    sol_dict_def[commod_key] += [
+                        (edge, flow_val)
+                        for edge in path_to_edge_list(self._all_paths[p])
                     ]
 
             # Set zero-flow commodities to be empty lists
@@ -208,16 +216,15 @@ class SMORE(AbstractFormulation):
     @property
     def sol_mat(self):
         edge_idx = self.problem.edge_idx
-        sol_mat = np.zeros((len(edge_idx), len(self._path_to_commod)),
-                           dtype=np.float32)
+        sol_mat = np.zeros((len(edge_idx), len(self._path_to_commod)), dtype=np.float32)
         for var in self.model.getVars():
-            if var.varName.startswith('f[') and var.x != 0.0:
-                match = re.match(r'f\[(\d+)\]', var.varName)
+            if var.varName.startswith("f[") and var.x != 0.0:
+                match = re.match(r"f\[(\d+)\]", var.varName)
                 p = int(match.group(1))
                 commod_key = self.problem.commodity_list[self._path_to_commod[p]]
                 k, d_k = commod_key[0], commod_key[-1][-1]
                 for edge in path_to_edge_list(self._all_paths[p]):
-                    sol_mat[edge_idx[edge], k] += var.x*d_k
+                    sol_mat[edge_idx[edge], k] += var.x * d_k
 
         return sol_mat
 
@@ -251,7 +258,7 @@ class SMORE(AbstractFormulation):
     def num_fib_entries_for_path_set(self):
         self.fib_dict = defaultdict(dict)
         for k, _, path_ids in self.commodities:
-            commod_id_str = 'k-{}'.format(k)
+            commod_id_str = "k-{}".format(k)
             src = list(path_to_edge_list(self._all_paths[path_ids[0]]))[0][0]
             # For a given TM, we would store weights for each path id. For demo
             # purposes, we just store the path ids

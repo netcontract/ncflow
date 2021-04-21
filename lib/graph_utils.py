@@ -5,6 +5,7 @@ from collections import defaultdict
 
 EPS = 1e-4
 
+
 def assert_flow_conservation(flow_list, commod_key):
     if len(flow_list) == 0:
         return 0.0
@@ -51,10 +52,10 @@ def compute_residual_problem(problem, sol_dict):
         tm[s_k, t_k] = new_d_k
 
         for (u, v), l in flow_list:
-            problem.G[u][v]['capacity'] -= l
+            problem.G[u][v]["capacity"] -= l
             # same here; clamp capacity to 0.0
-            if problem.G[u][v]['capacity'] < 0.0:
-                 problem.G[u][v]['capacity'] = 0.0
+            if problem.G[u][v]["capacity"] < 0.0:
+                problem.G[u][v]["capacity"] = 0.0
 
     problem._invalidate_commodity_lists()
     return problem
@@ -64,7 +65,7 @@ def compute_residual_problem(problem, sol_dict):
 def compute_residual_graph(G, sol_dict):
     for flow_list in sol_dict.values():
         for (u, v), l in flow_list:
-            G[u][v]['capacity'] -= l
+            G[u][v]["capacity"] -= l
 
 
 # If target_node is not present in the flow sequence, return [], []
@@ -195,7 +196,7 @@ def sort_flow_seq(_flow_seq, src):
             # and continue
             new_edge_flow = new_edge_flows[0]  # (u, v), l
             (_, v), l = new_edge_flow
-            assert l == curr_flow or curr_flow == float('inf')
+            assert l == curr_flow or curr_flow == float("inf")
             to_return.append(new_edge_flow)
             del flow_seq[inds_to_delete[0]]
             return sort_flow_seq(to_return, flow_seq, v, l)
@@ -221,13 +222,13 @@ def sort_flow_seq(_flow_seq, src):
                 flow_sum += l
                 to_return.append(new_sub_flow)
             # all the sub-flows add up to the total flow
-            assert flow_sum == curr_flow or curr_flow == float('inf')
+            assert flow_sum == curr_flow or curr_flow == float("inf")
             curr_flow = flow_sum
 
             return sort_flow_seq(to_return, flow_seq, new_src, curr_flow)
 
     to_return = []
-    sort_flow_seq(to_return, _flow_seq.copy(), src, curr_flow=float('inf'))
+    sort_flow_seq(to_return, _flow_seq.copy(), src, curr_flow=float("inf"))
     return to_return
 
 
@@ -254,17 +255,15 @@ def transform_for_network_simplex(problem, vis=False):
         # First add new source and sink nodes to the graph
         new_src, new_sink = node_index, node_index + 1
         if vis:
-            src_pos, sink_pos = G.nodes[s_k]['pos'], G.nodes[t_k]['pos']
-            new_src_pos = src_pos[0] + uni_rand(-2, 0), src_pos[-1] + uni_rand(
-                -2, 0)
-            new_sink_pos = sink_pos[0] - uni_rand(
-                -2, 0), sink_pos[-1] - uni_rand(-2, 0)
+            src_pos, sink_pos = G.nodes[s_k]["pos"], G.nodes[t_k]["pos"]
+            new_src_pos = src_pos[0] + uni_rand(-2, 0), src_pos[-1] + uni_rand(-2, 0)
+            new_sink_pos = sink_pos[0] - uni_rand(-2, 0), sink_pos[-1] - uni_rand(-2, 0)
 
-        G.add_node(new_src, demand=-d_k, label='{}: {}'.format(new_src, -d_k))
-        G.add_node(new_sink, demand=d_k, label='{}: {}'.format(new_sink, d_k))
+        G.add_node(new_src, demand=-d_k, label="{}: {}".format(new_src, -d_k))
+        G.add_node(new_sink, demand=d_k, label="{}: {}".format(new_sink, d_k))
         if vis:
-            G[new_src]['pos'] = new_src_pos
-            G[new_sink]['pos'] = new_sink_pos
+            G[new_src]["pos"] = new_src_pos
+            G[new_sink]["pos"] = new_sink_pos
 
         # Then add edge in both directions connecting new source to old with infinite capacity
         G.add_edge(new_src, s_k, weight=1, capacity=maxsize)
@@ -278,6 +277,7 @@ def transform_for_network_simplex(problem, vis=False):
 
     return G
 
+
 # Takes one or more sol_dicts for a given problem; determines if the solution
 # (i.e. all the sol_dicts) is feasible. If the solution is not feasible, an
 # exception will be thrown via a failed assertion.
@@ -285,12 +285,12 @@ def transform_for_network_simplex(problem, vis=False):
 # Also computes objective value for MAX
 # FLOW, and prints out the bottleneck edges yielded by the solution
 def check_feasibility(problem, sol_dicts):
-    print('Checking feasibility of solution')
+    print("Checking feasibility of solution")
     obj_val = 0.0
     EPS = 1e-3
 
     G_copy = problem.G.copy()
-    print('checking flow conservation')
+    print("checking flow conservation")
     for sol_dict in sol_dicts:
         for commod_key, flow_list in sol_dict.items():
             flow_for_commod = assert_flow_conservation(flow_list, commod_key)
@@ -298,22 +298,20 @@ def check_feasibility(problem, sol_dicts):
             assert flow_for_commod <= commod_key[-1][-1] + EPS
             obj_val += flow_for_commod
             for (u, v), flow_val in flow_list:
-                G_copy[u][v]['capacity'] -= flow_val
+                G_copy[u][v]["capacity"] -= flow_val
                 # if G_copy[u][v]['capacity'] < 0.0:
                 #     print(u, v, G_copy[u][v]['capacity'])
-                assert G_copy[u][v]['capacity'] > -EPS
-    print('Full Obj: ' + str(obj_val))
-    print('checking capacity constraints')
+                assert G_copy[u][v]["capacity"] > -EPS
+    print("Full Obj: " + str(obj_val))
+    print("checking capacity constraints")
     edge_percent_cap_remaining = []
-    for u, v, cap in G_copy.edges.data('capacity'):
+    for u, v, cap in G_copy.edges.data("capacity"):
         # if G_copy[u][v]['capacity'] < 0.0:
         #     print(u, v, G_copy[u][v]['capacity'])
-        assert G_copy[u][v]['capacity'] > -EPS
-        if problem.G[u][v]['capacity'] == 0.0:
+        assert G_copy[u][v]["capacity"] > -EPS
+        if problem.G[u][v]["capacity"] == 0.0:
             continue
-        edge_percent_cap_remaining.append(
-            (u, v, cap / problem.G[u][v]['capacity']))
+        edge_percent_cap_remaining.append((u, v, cap / problem.G[u][v]["capacity"]))
 
-    bottleneck_edges = sorted(
-        edge_percent_cap_remaining, key=lambda x: x[-1])
-    print('Bottleneck edges')
+    bottleneck_edges = sorted(edge_percent_cap_remaining, key=lambda x: x[-1])
+    print("Bottleneck edges")

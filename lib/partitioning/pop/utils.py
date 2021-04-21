@@ -14,11 +14,15 @@ def check_dims(subproblem_list, input_set_dims):
 
     num_subproblems = len(subproblem_list)
     num_dimensions = len(list(input_set_dims.values())[0])
-    print("checking split of " + str(num_dimensions) + " dimensions over " +
-          str(num_subproblems) + " subproblems")
+    print(
+        "checking split of "
+        + str(num_dimensions)
+        + " dimensions over "
+        + str(num_subproblems)
+        + " subproblems"
+    )
 
-    subproblem_dim_sums = [np.zeros(num_dimensions)
-                           for _ in range(num_subproblems)]
+    subproblem_dim_sums = [np.zeros(num_dimensions) for _ in range(num_subproblems)]
 
     for k in range(num_subproblems):
         subproblem_entities = subproblem_list[k]
@@ -26,42 +30,44 @@ def check_dims(subproblem_list, input_set_dims):
         for entity in subproblem_entities:
             entity_dims = input_set_dims[entity]
             subproblem_dim_sums[k] = np.add(
-                np.asarray(entity_dims), subproblem_dim_sums[k])
-        subproblem_dim_sums[k] = subproblem_dim_sums[k] / \
-            len(subproblem_entities)
+                np.asarray(entity_dims), subproblem_dim_sums[k]
+            )
+        subproblem_dim_sums[k] = subproblem_dim_sums[k] / len(subproblem_entities)
         print("subproblem " + str(k) + ": " + str(subproblem_dim_sums[k]))
     return subproblem_dim_sums
 
 
 def calc_cov_online(current_cov, current_means, num_entity, new_entity):
     num_dims = len(current_means)
-    new_means = (current_means * num_entity +
-                 np.asarray(new_entity))/(num_entity + 1)
+    new_means = (current_means * num_entity + np.asarray(new_entity)) / (num_entity + 1)
 
     resid_row_array = np.asarray(
-        [[d-new_means[i]]*num_dims for i, d in enumerate(new_entity)])
+        [[d - new_means[i]] * num_dims for i, d in enumerate(new_entity)]
+    )
     resid_col_array = np.transpose(resid_row_array)
 
-    new_cov = current_cov*(num_entity-1) + \
-        (num_entity/(num_entity-1)) * \
-        (np.multiply(resid_row_array, resid_col_array))
-    new_cov = new_cov/num_entity
+    new_cov = current_cov * (num_entity - 1) + (num_entity / (num_entity - 1)) * (
+        np.multiply(resid_row_array, resid_col_array)
+    )
+    new_cov = new_cov / num_entity
 
     return new_cov
+
 
 # calculate the change in MSE between subproblem inputs and all inputs covariance
 
 
-def calc_dist_cov_change(input_set_dims, new_entity, origin_dist_covs,
-                         num_entity_mean, current_covs):
+def calc_dist_cov_change(
+    input_set_dims, new_entity, origin_dist_covs, num_entity_mean, current_covs
+):
     num_dims = len(new_entity)
-    #print("old covs: " + str(current_covs))
+    # print("old covs: " + str(current_covs))
     num_entity_in_sp = num_entity_mean[0]
     new_covs = np.zeros((num_dims, num_dims))
     if num_entity_in_sp > 0:
 
         # calculate it from scratch for the first 50 elements
-        if (num_entity_in_sp < 2):
+        if num_entity_in_sp < 2:
             input_set_dims_new = copy.deepcopy(input_set_dims)
             for d in range(num_dims):
                 input_set_dims_new[d] += [new_entity[d]]
@@ -69,10 +75,11 @@ def calc_dist_cov_change(input_set_dims, new_entity, origin_dist_covs,
         # use online update estimate
         else:
             new_covs = calc_cov_online(
-                current_covs, num_entity_mean[1], num_entity_mean[0], new_entity)
+                current_covs, num_entity_mean[1], num_entity_mean[0], new_entity
+            )
 
-    old_mse = ((current_covs - origin_dist_covs)**2).mean(axis=None)
-    new_mse = ((new_covs - origin_dist_covs)**2).mean(axis=None)
+    old_mse = ((current_covs - origin_dist_covs) ** 2).mean(axis=None)
+    new_mse = ((new_covs - origin_dist_covs) ** 2).mean(axis=None)
 
     dist_diff = old_mse - new_mse
     return dist_diff, new_covs
@@ -99,21 +106,23 @@ def create_edges_onehot_dict(problem, pf_original):
             max_demand = demand
 
         for path in paths_array:
-            com_path_edges_dict[(k, source, target, demand)
-                                ] += list(path_to_edge_list(path))
+            com_path_edges_dict[(k, source, target, demand)] += list(
+                path_to_edge_list(path)
+            )
 
     com_path_edges_onehot_dict = defaultdict(list)
-    np_data = np.zeros((num_entities, num_edges+1))
+    np_data = np.zeros((num_entities, num_edges + 1))
     for (k, source, target, demand), edge_list in com_path_edges_dict.items():
-        onehot_edge = [0]*num_edges
+        onehot_edge = [0] * num_edges
         for edge in edge_list:
             edge_i = enum_edges_dict[edge]
             onehot_edge[edge_i] = 1
             np_data[k, edge_i] = 1
         # add in normalized demand as a dimension
-        norm_demand = (demand - min_demand)/(max_demand-min_demand)
-        com_path_edges_onehot_dict[(
-            k, source, target, demand)] = onehot_edge + [norm_demand]
+        norm_demand = (demand - min_demand) / (max_demand - min_demand)
+        com_path_edges_onehot_dict[(k, source, target, demand)] = onehot_edge + [
+            norm_demand
+        ]
         np_data[k, -1] = norm_demand
 
     return com_path_edges_onehot_dict
@@ -127,21 +136,19 @@ def calc_dist_mean_change(input_set_dims, new_entity, origin_dist, num_entity_me
     num_entity = num_entity_mean[0]
     current_means = num_entity_mean[1]
 
-    new_means = (current_means*num_entity +
-                 np.asarray(new_entity))/(num_entity+1)
+    new_means = (current_means * num_entity + np.asarray(new_entity)) / (num_entity + 1)
 
-    sq_sum_distance_new = np.sum(
-        np.square((new_means - origin_dist)/origin_dist))
-    sq_sum_distance = np.sum(
-        np.square((current_means - origin_dist)/origin_dist))
+    sq_sum_distance_new = np.sum(np.square((new_means - origin_dist) / origin_dist))
+    sq_sum_distance = np.sum(np.square((current_means - origin_dist) / origin_dist))
 
     return math.sqrt(sq_sum_distance) - math.sqrt(sq_sum_distance_new)
+
 
 # input_dict: keys are entities and values are (ordered) list of entity dimensions,
 # k: number of subproblems
 
 
-def split_generic(input_dict, k, verbose=False, method='means'):
+def split_generic(input_dict, k, verbose=False, method="means"):
 
     num_inputs = len(input_dict)
     num_dimensions = len(list(input_dict.values())[0])
@@ -153,14 +160,13 @@ def split_generic(input_dict, k, verbose=False, method='means'):
         inputs = [val[d] for val in input_dict.values()]
         original_dist_inputs_by_dim.append(inputs)
         sum_d = sum(inputs)
-        original_dist_means_array[d] = sum_d/(num_inputs*1.0)
+        original_dist_means_array[d] = sum_d / (num_inputs * 1.0)
 
     original_dist_cov = np.cov(original_dist_inputs_by_dim)
 
     # subproblem_dim_lists has k lists, one for each subproblem. Within each list are d lists,
     # each containing the value of a dimension for each entity assigned to that subproblem
-    subproblem_dim_lists = [[[]
-                             for _ in range(num_dimensions)] for _ in range(k)]
+    subproblem_dim_lists = [[[] for _ in range(num_dimensions)] for _ in range(k)]
 
     # subproblem_entity_assignments is a list of lists
     subproblem_entity_assignments = [[] for _ in range(k)]
@@ -168,44 +174,51 @@ def split_generic(input_dict, k, verbose=False, method='means'):
     # Assign each entity to the sub-problem that would have their distance from the
     # original distribution shrink the most.
     num_assigned = 0
-    subproblem_num_entity_means = [
-        [0, np.zeros(num_dimensions)] for _ in range(k)]
-    subproblem_covs = [np.zeros((num_dimensions, num_dimensions))
-                       for _ in range(k)]
+    subproblem_num_entity_means = [[0, np.zeros(num_dimensions)] for _ in range(k)]
+    subproblem_covs = [np.zeros((num_dimensions, num_dimensions)) for _ in range(k)]
     for entity, dims in input_dict.items():
         if num_assigned % 5000 == 0:
             print("Assigned " + str(num_assigned) + " entities")
         max_dist_change = -np.inf
         max_dist_sp = 0
         updated_cov = None
-        random_sp1 = random.randint(0, k-1)
-        random_sp2 = random.randint(0, k-1)
+        random_sp1 = random.randint(0, k - 1)
+        random_sp2 = random.randint(0, k - 1)
         while random_sp1 == random_sp2:
-            random_sp2 = random.randint(0, k-1)
+            random_sp2 = random.randint(0, k - 1)
 
         for sp_index in [random_sp1, random_sp2]:
 
             # skip those that have more than equal share of currently assigned entities
-            if len(subproblem_entity_assignments[sp_index]) > (num_inputs+1)/(k*1.0):
+            if len(subproblem_entity_assignments[sp_index]) > (num_inputs + 1) / (
+                k * 1.0
+            ):
                 continue
             dist_change = 0
-            if method == 'means':
-                dist_change = calc_dist_mean_change(subproblem_dim_lists[sp_index], dims,
-                                                    original_dist_means_array, subproblem_num_entity_means[sp_index])
-            elif method == 'covs':
-                dist_change, new_cov = calc_dist_cov_change(subproblem_dim_lists[sp_index], dims,
-                                                            original_dist_cov, subproblem_num_entity_means[
-                                                                sp_index],
-                                                            subproblem_covs[sp_index])
-            #print("subproblem " + str(i) + ", dist change: " + str(dist_change))
+            if method == "means":
+                dist_change = calc_dist_mean_change(
+                    subproblem_dim_lists[sp_index],
+                    dims,
+                    original_dist_means_array,
+                    subproblem_num_entity_means[sp_index],
+                )
+            elif method == "covs":
+                dist_change, new_cov = calc_dist_cov_change(
+                    subproblem_dim_lists[sp_index],
+                    dims,
+                    original_dist_cov,
+                    subproblem_num_entity_means[sp_index],
+                    subproblem_covs[sp_index],
+                )
+            # print("subproblem " + str(i) + ", dist change: " + str(dist_change))
             if dist_change >= max_dist_change:
                 max_dist_change = dist_change
                 max_dist_sp = sp_index
-                if method == 'covs':
+                if method == "covs":
                     updated_cov = new_cov
 
         subproblem_entity_assignments[max_dist_sp].append(entity)
-        if method == 'cov':
+        if method == "cov":
             subproblem_covs[max_dist_sp] = new_cov
 
         # update means to reflect entity assignment
@@ -216,12 +229,13 @@ def split_generic(input_dict, k, verbose=False, method='means'):
         dim_means = subproblem_num_entity_means[max_dist_sp][1]
         subproblem_num_entity_means[max_dist_sp][0] += 1
         subproblem_num_entity_means[max_dist_sp][1] = (
-            dim_means*num_entity + np.asarray(dims))/(num_entity+1)
+            dim_means * num_entity + np.asarray(dims)
+        ) / (num_entity + 1)
 
         num_assigned += 1
 
         if verbose:
             print(subproblem_dim_lists)
             print(subproblem_entity_assignments)
-            print('\n')
+            print("\n")
     return subproblem_entity_assignments

@@ -154,7 +154,7 @@ class POP(PathFormulation):
 
     @property
     def sol_dict(self):
-        if not hasattr(self, '_sol_dict'):
+        if not hasattr(self, "_sol_dict"):
             sol_dicts = [pf.sol_dict for pf in self._pfs]
             merged_sol_dict = {
                 (src, target): flow_list
@@ -162,9 +162,7 @@ class POP(PathFormulation):
                 for (_, (src, target, _)), flow_list in sol_dict.items()
             }
             self._sol_dict = {
-                commod_key: merged_sol_dict[
-                    (commod_key[-1][0], commod_key[-1][1])
-                ]
+                commod_key: merged_sol_dict[(commod_key[-1][0], commod_key[-1][1])]
                 for commod_key in self.problem.commodity_list
             }
 
@@ -173,9 +171,7 @@ class POP(PathFormulation):
     @property
     def sol_mat(self):
         raise NotImplementedError(
-            "sol_mat needs to be implemented in the subclass: {}".format(
-                self.__class__
-            )
+            "sol_mat needs to be implemented in the subclass: {}".format(self.__class__)
         )
 
     def runtime_est(self, num_threads):

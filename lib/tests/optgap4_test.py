@@ -6,15 +6,15 @@ from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 # This test case illustrates the need for reconciliation to allow traffic to "criss-cross"
 # between nodes that are in neighboring meta-nodes.
 
-class OptGap4Test(AbstractTest):
 
+class OptGap4Test(AbstractTest):
     def __init__(self):
         super().__init__()
         self.problem = OptGap4()
 
     @property
     def name(self):
-        return 'optgap4'
+        return "optgap4"
 
     def run(self):
         ncf = NcfEpi.new_max_flow(4)

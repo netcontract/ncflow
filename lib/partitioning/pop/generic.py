@@ -1,10 +1,9 @@
-
 from .abstract_pop_splitter import AbstractPOPSplitter
 from .utils import create_edges_onehot_dict, split_generic
 
 
 class GenericSplitter(AbstractPOPSplitter):
-    def __init__(self, num_subproblems, pf, method='means', verbose=False):
+    def __init__(self, num_subproblems, pf, method="means", verbose=False):
         super().__init__(num_subproblems)
         self._pf = pf
         self.verbose = verbose
@@ -19,7 +18,8 @@ class GenericSplitter(AbstractPOPSplitter):
             return sub_problems
 
         entity_assignments_lists = split_generic(
-            input_dict, self._num_subproblems, verbose=self.verbose, method=self.method)
+            input_dict, self._num_subproblems, verbose=self.verbose, method=self.method
+        )
 
         for i in range(self._num_subproblems):
 
@@ -32,7 +32,8 @@ class GenericSplitter(AbstractPOPSplitter):
 
             # split the capacity of each link
             for u, v in sub_problems[i].G.edges:
-                sub_problems[i].G[u][v]['capacity'] = sub_problems[i].G[u][v]['capacity'] / \
-                    self._num_subproblems
+                sub_problems[i].G[u][v]["capacity"] = (
+                    sub_problems[i].G[u][v]["capacity"] / self._num_subproblems
+                )
 
         return sub_problems

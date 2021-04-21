@@ -1,6 +1,7 @@
 # For computing fib entries
 from itertools import count
 
+
 class Counter(object):
     def __init__(self):
         self.counter = count()
@@ -13,4 +14,3 @@ class Counter(object):
             self.paths_dict[path] = next(self.counter)
 
         return self.paths_dict[path]
-

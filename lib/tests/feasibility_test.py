@@ -3,16 +3,15 @@ from ..problems import FeasibilityProblem1
 from ..partitioning.hard_coded_partitioning import HardCodedPartitioning
 from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 
+
 class FeasibilityTest(AbstractTest):
-
-
     def __init__(self):
         super().__init__()
         self.problem = FeasibilityProblem1()
 
     @property
     def name(self):
-        return 'feas'
+        return "feas"
 
     def run(self):
         ncf = NcfEpi.new_max_flow(4)

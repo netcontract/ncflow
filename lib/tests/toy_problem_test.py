@@ -3,15 +3,15 @@ from ..problems import ToyProblem
 from ..partitioning.hard_coded_partitioning import HardCodedPartitioning
 from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 
-class ToyProblemTest(AbstractTest):
 
+class ToyProblemTest(AbstractTest):
     def __init__(self):
         super().__init__()
         self.problem = ToyProblem()
 
     @property
     def name(self):
-        return 'toy'
+        return "toy"
 
     def run(self):
         ncf = NcfEpi.new_max_flow(4)
@@ -26,4 +26,3 @@ class ToyProblemTest(AbstractTest):
 
         self.assert_geq_epsilon(ncf.r3_obj_val, 45)
         self.assert_geq_epsilon(ncf.obj_val, 57)
-

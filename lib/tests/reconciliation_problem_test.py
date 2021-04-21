@@ -3,15 +3,15 @@ from ..problems import ReconciliationProblem
 from ..partitioning.hard_coded_partitioning import HardCodedPartitioning
 from ..algorithms.ncflow.ncflow_edge_per_iter import NCFlowEdgePerIter as NcfEpi
 
-class ReconciliationProblemTest(AbstractTest):
 
+class ReconciliationProblemTest(AbstractTest):
     def __init__(self):
         super().__init__()
         self.problem = ReconciliationProblem()
 
     @property
     def name(self):
-        return 'recon'
+        return "recon"
 
     def run(self):
         ncf = NcfEpi.new_max_flow(4)

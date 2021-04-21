@@ -1,7 +1,4 @@
-
-
 class AbstractPOPSplitter(object):
-
     def __init__(self, num_subproblems):
         self._num_subproblems = num_subproblems
 
@@ -11,5 +8,5 @@ class AbstractPOPSplitter(object):
     @property
     def split(self):
         raise NotImplementedError(
-            'split needs to be implemented in the subclass: {}'.format(
-                self.__class__))
+            "split needs to be implemented in the subclass: {}".format(self.__class__)
+        )

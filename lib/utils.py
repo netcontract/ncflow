@@ -27,10 +27,14 @@ def waterfall_memoized():
         EPS = 1e-6
         demand_remaining = {commod[0]: commod[-1][-1] for commod in commods}
         flow_remaining = flow_val
-        sorted_commods = [commod[0] for commod in sorted(commods, key=lambda x: x[-1][-1])]
+        sorted_commods = [
+            commod[0] for commod in sorted(commods, key=lambda x: x[-1][-1])
+        ]
         while len(demand_remaining) > 0:
             k_smallest = sorted_commods[0]
-            flow_to_assign = min(flow_remaining / len(commods), demand_remaining[k_smallest])
+            flow_to_assign = min(
+                flow_remaining / len(commods), demand_remaining[k_smallest]
+            )
             for commod_id, (_, _, orig_demand) in commods:
                 if commod_id not in demand_remaining:
                     continue
@@ -57,6 +61,7 @@ def nested_ddict_to_dict(ddict):
         ddict[k] = dict(v)
     return dict(ddict)
 
+
 # Converts {k1: [v1,... vn]} to {v1: k1,... vn: k1}
 def reverse_dict_value_list(dict_of_list):
     return {v: k for k, vals in dict_of_list.items() for v in vals}
@@ -75,7 +80,7 @@ def compute_max_link_util(G, sol_dict):
     max_edge = None
     max_util = 0.0
     for (u, v), total_flow in total_flow_on_edge.items():
-        edge_util = total_flow / G[u][v]['capacity']
+        edge_util = total_flow / G[u][v]["capacity"]
         if edge_util > max_util:
             max_util = edge_util
             max_edge = (u, v)
@@ -91,7 +96,7 @@ def link_util_stats(G, sol_dict):
             edge_flows[(u, v)] += l
 
     edge_utils = {}
-    for u, v, c_e in G.edges.data('capacity'):
+    for u, v, c_e in G.edges.data("capacity"):
         if c_e == 0.0:
             assert edge_flows[(u, v)] == 0.0
             edge_utils[(u, v)] = 0.0
@@ -101,4 +106,3 @@ def link_util_stats(G, sol_dict):
     values = list(edge_utils.values())
 
     return np.min(values), np.median(values), np.mean(values), np.max(values)
-
