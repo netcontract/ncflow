@@ -21,11 +21,12 @@ class RandomSplitter(AbstractPOPSplitter):
             # create list of sps to assign demand to
             assigned_sps_list = np.random.permutation(np.arange(self._num_subproblems))[:num_entity_splits]
             
-            # zero our each subproblem's tm entry for this entity, then add demand back for chosen sp's
+            # zero our each subproblem's tm entry for this entity, except for assigned sp's who each get a portion
             for sp in range(self._num_subproblems):
-                sub_problems[sp].traffic_matrix.tm[source, target] = 0
-            for sp in assigned_sps_list:
-                sub_problems[sp].traffic_matrix.tm[source, target] += demand/num_entity_splits
+                if sp in assigned_sps_list:
+                    sub_problems[sp].traffic_matrix.tm[source, target] /= num_entity_splits
+                else:
+                    sub_problems[sp].traffic_matrix.tm[source, target] = 0
         
         for sub_problem in sub_problems:
             for u, v in sub_problems[-1].G.edges:
