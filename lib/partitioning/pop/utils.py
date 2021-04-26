@@ -8,7 +8,7 @@ from kmodes.kprototypes import KPrototypes
 from sklearn.cluster import KMeans
 
 
-def create_edges_onehot_dict(problem, pf_original):
+def create_edges_onehot_dict(problem, pf_original, num_subproblems):
     paths_dict = pf_original.get_paths(problem)
     com_list = problem.commodity_list
     num_entities = len(com_list)
@@ -23,30 +23,42 @@ def create_edges_onehot_dict(problem, pf_original):
     max_demand = 0
     for k, (source, target, demand) in com_list:
         paths_array = paths_dict[(source, target)]
-        if min_demand > demand:
-            min_demand = demand
-        if max_demand < demand:
-            max_demand = demand
 
-        for path in paths_array:
-            com_path_edges_dict[(k, source, target, demand)] += list(
-                path_to_edge_list(path)
-            )
+        # determine if we need to split this commodity into several parts
+        num_split_entity = 1
+        if demand > 100/num_subproblems:
+            num_split_entity = min(num_subproblems, np.ceil(demand/(100/num_subproblems)))
 
+        split_demand = demand/num_split_entity
+
+        if min_demand > split_demand:
+            min_demand = split_demand
+        if max_demand < split_demand:
+            max_demand = split_demand
+
+        # add an entry to the dict for each split, each of which has a fraction of demand
+        for i in range(num_split_entity):
+            for path in paths_array:
+                com_path_edges_dict[(k+2000000+i, source, target, split_demand)] += list(
+                    path_to_edge_list(path)
+                )
     com_path_edges_onehot_dict = defaultdict(list)
+    num_entities = len(com_path_edges_dict)
     np_data = np.zeros((num_entities, num_edges + 1))
+    np_data_i = 0
     for (k, source, target, demand), edge_list in com_path_edges_dict.items():
         onehot_edge = [0] * num_edges
         for edge in edge_list:
             edge_i = enum_edges_dict[edge]
             onehot_edge[edge_i] = 1
-            np_data[k, edge_i] = 1
+            np_data[np_data_i, edge_i] = 1
         # add in normalized demand as a dimension
         norm_demand = (demand - min_demand) / (max_demand - min_demand)
         com_path_edges_onehot_dict[(k, source, target, demand)] = onehot_edge + [
             norm_demand
         ]
-        np_data[k, -1] = norm_demand
+        np_data[np_data_i, -1] = norm_demand
+        np_data_i += 1
 
     return com_path_edges_onehot_dict
 

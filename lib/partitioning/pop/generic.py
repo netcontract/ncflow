@@ -10,12 +10,17 @@ class GenericSplitter(AbstractPOPSplitter):
         self.method = method
 
     def split(self, problem):
-        input_dict = create_edges_onehot_dict(problem, self._pf)
+        input_dict = create_edges_onehot_dict(problem, self._pf, self._num_subproblems)
 
         # create subproblems, zero out commodities in traffic matrix that aren't assigned to each
         sub_problems = [problem.copy() for _ in range(self._num_subproblems)]
         if self._num_subproblems == 1:
             return sub_problems
+
+        # zero-out the traffic matrices; they will be populated later using entity_assignments_lists
+        for sp in sub_problems:
+            for u,v in sp.G.edges:
+                sp.traffic_matrix.tm[u,v] = 0
 
         entity_assignments_lists = split_generic(
             input_dict, self._num_subproblems, verbose=self.verbose, method=self.method
@@ -24,11 +29,10 @@ class GenericSplitter(AbstractPOPSplitter):
         for i in range(self._num_subproblems):
 
             # zero out all commodities not assigned to subproblem i
-            for _, source, target, _ in entity_assignments_lists[i]:
+            for _, source, target, demand in entity_assignments_lists[i]:
                 for j in range(self._num_subproblems):
                     if i == j:
-                        continue
-                    sub_problems[j].traffic_matrix.tm[source, target] = 0
+                        sub_problems[j].traffic_matrix.tm[source, target] = demand
 
             # split the capacity of each link
             for u, v in sub_problems[i].G.edges:
