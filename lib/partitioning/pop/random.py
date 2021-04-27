@@ -14,17 +14,18 @@ class RandomSplitter(AbstractPOPSplitter):
         for _, (source, target, demand) in problem.commodity_list:
            
             # find out how many times you have to halve demand so its within max 
-            b = 0
-            while demand/(2**b) > max_demand:
-                b += 1         
-            num_entity_splits = min(2**b, self._num_subproblems)
+            
+            num_split_entity = 1
+            if demand > max_demand:
+                num_entity_splits = min(self._num_subproblems, np.ceil(demand/max_demand))
+            split_demand = demand/num_split_entity
             # create list of sps to assign demand to
             assigned_sps_list = np.random.permutation(np.arange(self._num_subproblems))[:num_entity_splits]
             
             # zero our each subproblem's tm entry for this entity, except for assigned sp's who each get a portion
             for sp in range(self._num_subproblems):
                 if sp in assigned_sps_list:
-                    sub_problems[sp].traffic_matrix.tm[source, target] /= num_entity_splits
+                    sub_problems[sp].traffic_matrix.tm[source, target] = split_demand
                 else:
                     sub_problems[sp].traffic_matrix.tm[source, target] = 0
         
