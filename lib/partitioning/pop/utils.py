@@ -17,6 +17,8 @@ def create_edges_onehot_dict(problem, pf_original, num_subproblems):
     for i, edge in enumerate(problem.G.edges):
         enum_edges_dict[edge] = i
 
+    MAX_DEMAND_THRESHOLD = 100.0/num_subproblems
+
     # create dictionary of all edges used by each commodity
     com_path_edges_dict = defaultdict(list)
     min_demand = np.inf
@@ -26,8 +28,8 @@ def create_edges_onehot_dict(problem, pf_original, num_subproblems):
 
         # determine if we need to split this commodity into several parts
         num_split_entity = 1
-        if demand > 100/num_subproblems:
-            num_split_entity = min(num_subproblems, np.ceil(demand/(100/num_subproblems)))
+        if demand > MAX_DEMAND_THRESHOLD:
+            num_split_entity = min(num_subproblems, int(np.ceil(demand/MAX_DEMAND_THRESHOLD)))
 
         split_demand = demand/num_split_entity
 
@@ -39,7 +41,7 @@ def create_edges_onehot_dict(problem, pf_original, num_subproblems):
         # add an entry to the dict for each split, each of which has a fraction of demand
         for i in range(num_split_entity):
             for path in paths_array:
-                com_path_edges_dict[(k+2000000+i, source, target, split_demand)] += list(
+                com_path_edges_dict[(k+i*0.001, source, target, split_demand)] += list(
                     path_to_edge_list(path)
                 )
     com_path_edges_onehot_dict = defaultdict(list)

@@ -17,10 +17,10 @@ class RandomSplitter(AbstractPOPSplitter):
             
             num_split_entity = 1
             if demand > max_demand:
-                num_entity_splits = min(self._num_subproblems, np.ceil(demand/max_demand))
+                num_split_entity = min(self._num_subproblems, int(np.ceil(demand/max_demand)))
             split_demand = demand/num_split_entity
             # create list of sps to assign demand to
-            assigned_sps_list = np.random.permutation(np.arange(self._num_subproblems))[:num_entity_splits]
+            assigned_sps_list = np.random.permutation(np.arange(self._num_subproblems))[:num_split_entity]
             
             # zero our each subproblem's tm entry for this entity, except for assigned sp's who each get a portion
             for sp in range(self._num_subproblems):
