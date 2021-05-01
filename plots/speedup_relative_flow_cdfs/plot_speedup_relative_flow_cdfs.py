@@ -19,13 +19,13 @@ from plot_utils import (
 PF_PARAMS = 'num_paths == 4 and edge_disjoint == True and dist_metric == "inv-cap"'
 
 
-def get_ratio_df(other_df, baseline_df, suffix):
+def get_ratio_df(other_df, baseline_df, target_col, suffix):
     join_df = baseline_df.join(
         other_df, how="inner", lsuffix="_baseline", rsuffix=suffix
     ).reset_index()
     results = []
     for _, row in join_df.iterrows():
-        flow_ratio = row["total_flow{}".format(suffix)] / row["total_flow_baseline"]
+        target_col_ratio = row[target_col + suffix] / row["{}_baseline".format(target_col)]
         speedup_ratio = row["runtime_baseline"] / row["runtime{}".format(suffix)]
         results.append(
             [
@@ -33,7 +33,7 @@ def get_ratio_df(other_df, baseline_df, suffix):
                 row["tm_model"],
                 row["traffic_seed"],
                 row["scale_factor"],
-                flow_ratio,
+                target_col_ratio,
                 speedup_ratio,
             ]
         )
@@ -64,7 +64,6 @@ def join_with_fib_entries(df, fib_entries_df, index_cols):
 def plot_cdfs(
     vals_list,
     labels,
-    line_style_keys,
     fname,
     *,
     ax=None,
@@ -84,14 +83,12 @@ def plot_cdfs(
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
 
-    for vals, label, line_style_key in zip(vals_list, labels, line_style_keys):
+    for vals, label in zip(vals_list, labels):
         vals = sorted([x for x in vals if not np.isnan(x)])
         ax.plot(
             vals,
             np.arange(len(vals)) / len(vals),
             label=LABEL_NAMES_DICT[label] if label in LABEL_NAMES_DICT else label,
-            linestyle=LINE_STYLES_DICT[line_style_key],
-            color=COLOR_NAMES_DICT[line_style_key],
         )
     if add_ylabel:
         ax.set_ylabel("Fraction of Cases")
@@ -206,44 +203,46 @@ def get_ratio_dataframes(curr_dir, query_str=None):
     if query_str is not None:
         pop_df = pop_df.query(query_str)
 
-    pop_tailored_64_df = pop_df.query(
-        'split_method == "tailored" and num_subproblems == 64'
-    )
-    pop_tailored_16_df = pop_df.query(
-        'split_method == "tailored" and num_subproblems == 16'
-    )
-    pop_tailored_4_df = pop_df.query(
-        'split_method == "tailored" and num_subproblems == 4'
-    )
+    # POP Entity Splitting DF
+    pop_entity_splitting_df = pd.read_csv(curr_dir + "pop_entitysplitting.csv")
+    pop_entity_splitting_df = sort_and_set_index(pop_entity_splitting_df, drop=True)
+    if query_str is not None:
+        pop_entity_splitting_df = pop_entity_splitting_df.query(query_str)
 
-    pop_random_64_df = pop_df.query(
-        'split_method == "random" and num_subproblems == 64'
-    )
-    pop_random_16_df = pop_df.query(
-        'split_method == "random" and num_subproblems == 16'
-    )
-    pop_random_4_df = pop_df.query('split_method == "random" and num_subproblems == 4')
+    def get_pop_dfs(pop_parent_df, suffix):
+        pop_tailored_16_df = pop_parent_df.query(
+            'split_method == "tailored" and num_subproblems == 16'
+        )
+        pop_tailored_4_df = pop_parent_df.query(
+            'split_method == "tailored" and num_subproblems == 4'
+        )
 
-    pop_means_64_df = pop_df.query('split_method == "means" and num_subproblems == 64')
-    pop_means_16_df = pop_df.query('split_method == "means" and num_subproblems == 16')
-    pop_means_4_df = pop_df.query('split_method == "means" and num_subproblems == 4')
+        pop_random_16_df = pop_parent_df.query(
+            'split_method == "random" and num_subproblems == 16'
+        )
+        pop_random_4_df = pop_parent_df.query('split_method == "random" and num_subproblems == 4')
+
+        pop_means_16_df = pop_parent_df.query('split_method == "means" and num_subproblems == 16')
+        pop_means_4_df = pop_parent_df.query('split_method == "means" and num_subproblems == 4')
+
+        return [
+            get_ratio_df(df, path_form_df, "obj_val", suffix)
+            for df in [
+                pop_tailored_16_df,
+                pop_tailored_4_df,
+                pop_random_16_df,
+                pop_random_4_df,
+                pop_means_16_df,
+                pop_means_4_df,
+            ]
+        ]
+
+    pop_df_list = get_pop_dfs(pop_df, "_pop")
+    pop_entity_splitting_df_list = get_pop_dfs(pop_entity_splitting_df, "_pop_entity_splitting")
 
     # Ratio DFs
-    nc_ratio_df = get_ratio_df(nc_iterative_df, path_form_df, "_nc")
-    return [
-        get_ratio_df(df, path_form_df, "_pop")
-        for df in [
-            pop_tailored_64_df,
-            pop_tailored_16_df,
-            pop_tailored_4_df,
-            pop_random_64_df,
-            pop_random_16_df,
-            pop_random_4_df,
-            pop_means_64_df,
-            pop_means_16_df,
-            pop_means_4_df,
-        ]
-    ] + [nc_ratio_df]
+    nc_ratio_df = get_ratio_df(nc_iterative_df, path_form_df, "obj_val", "_nc")
+    return pop_df_list + pop_entity_splitting_df_list + [nc_ratio_df]
 
 
 def plot_speedup_relative_flow_cdfs(
@@ -252,67 +251,66 @@ def plot_speedup_relative_flow_cdfs(
     query_str='problem not in ["Uninett2010.graphml", "Ion.graphml", "Interoute.graphml"]',
 ):
     ratio_dfs = get_ratio_dataframes(curr_dir, query_str)
-    # pop_tailored_64_df = ratio_dfs[0]
-    pop_tailored_16_df = ratio_dfs[1]
-    # pop_tailored_4_df = ratio_dfs[2]
-    # pop_random_64_df = ratio_dfs[3]
-    pop_random_16_df = ratio_dfs[4]
-    # pop_random_4_df = ratio_dfs[5]
-    # pop_means_64_df = ratio_dfs[6]
-    # pop_means_16_df = ratio_dfs[7]
-    # pop_means_4_df = ratio_dfs[8]
-    nc_ratio_df = ratio_dfs[9]
+    pop_tailored_16_df = ratio_dfs[0]
+    # pop_tailored_4_df = ratio_dfs[1]
 
-    # Print stats
-    print(
-        "Random 16 Flow ratio vs PF4:\nmin: {},\nmedian: {},\nmean: {},\nmax: {}".format(
-            np.min(pop_random_16_df["flow_ratio"]),
-            np.median(pop_random_16_df["flow_ratio"]),
-            np.mean(pop_random_16_df["flow_ratio"]),
-            np.max(pop_random_16_df["flow_ratio"]),
-        )
-    )
-    print()
-    if len(pop_tailored_16_df) > 0:
+    pop_random_16_df = ratio_dfs[2]
+    # pop_random_4_df = ratio_dfs[3]
+
+    # pop_means_16_df = ratio_dfs[4]
+    # pop_means_4_df = ratio_dfs[5]
+
+    pop_entity_splitting_tailored_16_df = ratio_dfs[6]
+    # pop_entity_splitting_tailored_4_df = ratio_dfs[7]
+
+    pop_entity_splitting_random_16_df = ratio_dfs[8]
+    # pop_entity_splitting_random_4_df = ratio_dfs[9]
+
+    pop_entity_splitting_means_16_df = ratio_dfs[10]
+    # pop_entity_splitting_means_4_df = ratio_dfs[11]
+
+    nc_ratio_df = ratio_dfs[-1]
+
+    def print_stats(df_to_print, name_to_print):
+        # Print stats
         print(
-            "Tailored 16 Flow ratio vs PF4:\nmin: {},\nmedian: {},\nmean: {},\nmax: {}".format(
-                np.min(pop_tailored_16_df["flow_ratio"]),
-                np.median(pop_tailored_16_df["flow_ratio"]),
-                np.mean(pop_tailored_16_df["flow_ratio"]),
-                np.max(pop_tailored_16_df["flow_ratio"]),
+            "{} Flow ratio vs PF4:\nmin: {},\nmedian: {},\nmean: {},\nmax: {}".format(
+                name_to_print,
+                np.min(df_to_print["flow_ratio"]),
+                np.median(df_to_print["flow_ratio"]),
+                np.mean(df_to_print["flow_ratio"]),
+                np.max(df_to_print["flow_ratio"]),
+            )
+        )
+        print()
+        print(
+            "{} Speedup ratio vs PF4:\nmin: {},\nmedian: {},\nmean: {},\nmax: {}".format(
+                name_to_print,
+                np.min(df_to_print["speedup_ratio"]),
+                np.median(df_to_print["speedup_ratio"]),
+                np.mean(df_to_print["speedup_ratio"]),
+                np.max(df_to_print["speedup_ratio"]),
             )
         )
         print()
 
-    print(
-        "Random 16 Speedup ratio vs PF4:\nmin: {},\nmedian: {},\nmean: {},\nmax: {}".format(
-            np.min(pop_random_16_df["speedup_ratio"]),
-            np.median(pop_random_16_df["speedup_ratio"]),
-            np.mean(pop_random_16_df["speedup_ratio"]),
-            np.max(pop_random_16_df["speedup_ratio"]),
-        )
-    )
-    print()
-    if len(pop_tailored_16_df) > 0:
-        print(
-            "Tailored 16 Speedup ratio vs PF4:\nmin: {},\nmedian: {},\nmean: {},\nmax: {}".format(
-                np.min(pop_tailored_16_df["speedup_ratio"]),
-                np.median(pop_tailored_16_df["speedup_ratio"]),
-                np.mean(pop_tailored_16_df["speedup_ratio"]),
-                np.max(pop_tailored_16_df["speedup_ratio"]),
-            )
-        )
-        print()
+    # print_stats(nc_ratio_df, "NCFlow")
+    # print_stats(pop_random_16_df, "Random 16")
+    # print_stats(pop_tailored_16_df, "Tailored 16")
+    print_stats(pop_entity_splitting_random_16_df, "Random Entity Splitting 16")
+    print_stats(pop_entity_splitting_tailored_16_df, "Tailored Entity Splitting 16")
 
     # Plot CDFs
     plot_cdfs(
         [
-            nc_ratio_df["speedup_ratio"],
-            pop_random_16_df["speedup_ratio"],
-            pop_tailored_16_df["speedup_ratio"],
+            # nc_ratio_df["speedup_ratio"],
+            # pop_random_16_df["speedup_ratio"],
+            # pop_tailored_16_df["speedup_ratio"],
+            pop_entity_splitting_random_16_df["speedup_ratio"],
+            pop_entity_splitting_tailored_16_df["speedup_ratio"],
         ],
-        ["NCFlow", "Random, 16", "Tailored, 16"],
-        ["nc", "smore", "fe"],
+        # ["NCFlow", "Random, 16", "Tailored, 16", "Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
+        ["Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
         "speedup-cdf-{}".format(title),
         x_log=True,
         x_label=r"Speedup, relative to PF4 (log scale)",
@@ -324,12 +322,14 @@ def plot_speedup_relative_flow_cdfs(
 
     plot_cdfs(
         [
-            nc_ratio_df["flow_ratio"],
-            pop_random_16_df["flow_ratio"],
-            pop_tailored_16_df["flow_ratio"],
+            # nc_ratio_df["flow_ratio"],
+            # pop_random_16_df["flow_ratio"],
+            # pop_tailored_16_df["flow_ratio"],
+            pop_entity_splitting_random_16_df["flow_ratio"],
+            pop_entity_splitting_tailored_16_df["flow_ratio"],
         ],
-        ["NCFlow", "Random, 16", "Tailored, 16"],
-        ["nc", "smore", "fe"],
+        # ["NCFlow", "Random, 16", "Tailored, 16", "Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
+        ["Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
         "total-flow-cdf-{}".format(title),
         x_log=False,
         x_label=r"Total Flow, relative to PF4",

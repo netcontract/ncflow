@@ -1,4 +1,4 @@
-problem,num_nodes,num_edges,traffic_seed,scale_factor,tm_model,num_commodities,total_demand,algo,num_paths,edge_disjoint,dist_metric,objective,total_flow,runtime
+problem,num_nodes,num_edges,traffic_seed,scale_factor,tm_model,num_commodities,total_demand,algo,num_paths,edge_disjoint,dist_metric,objective,obj_val,runtime
 GtsCe.graphml,149,386,1270793205,4.0,uniform,22052,2197.927978515625,path_formulation,4,True,inv-cap,max_flow,2197.9279812963587,0.15565991401672363
 GtsCe.graphml,149,386,1216622520,64.0,uniform,22052,35077.78125,path_formulation,4,True,inv-cap,max_flow,23444.957968189323,2.484661817550659
 GtsCe.graphml,149,386,11310254,2.0,uniform,22052,1106.06396484375,path_formulation,4,True,inv-cap,max_flow,1106.0639961283732,0.14231300354003906

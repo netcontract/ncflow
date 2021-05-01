@@ -37,7 +37,7 @@ HEADERS = [
     "edge_disjoint",
     "dist_metric",
     "iteration",
-    "total_flow",
+    "obj_val",
     "runtime",
     "r1_runtime",
     "r2_runtime",
@@ -154,7 +154,7 @@ def benchmark(problems):
                             recon_runtime,
                             r3_runtime,
                             kirchoffs_runtime,
-                        ) = nc.runtime_est(28, breakdown=True)
+                        ) = nc.runtime_est(28, breakdown=True) # Hard-coded for DAWN machines
                         runtime = (
                             r1_runtime
                             + r2_runtime

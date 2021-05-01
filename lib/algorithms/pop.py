@@ -156,11 +156,10 @@ class POP(PathFormulation):
     def sol_dict(self):
         if not hasattr(self, "_sol_dict"):
             sol_dicts = [pf.sol_dict for pf in self._pfs]
-            merged_sol_dict = {
-                (src, target): flow_list
-                for sol_dict in sol_dicts
-                for (_, (src, target, _)), flow_list in sol_dict.items()
-            }
+            merged_sol_dict = defaultdict(list)
+            for sol_dict in sol_dicts:
+                for (_, (src, target, _)), flow_list in sol_dict.items():
+                    merged_sol_dict[(src, target)] += flow_list
             self._sol_dict = {
                 commod_key: merged_sol_dict[(commod_key[-1][0], commod_key[-1][1])]
                 for commod_key in self.problem.commodity_list

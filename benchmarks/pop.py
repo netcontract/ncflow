@@ -139,7 +139,7 @@ def benchmark(problems):
                             dist_metric,
                             "max_flow",
                             pop.obj_val,
-                            pop.runtime_est(28),  # hard-coded for DAWN machines
+                            pop.runtime_est(28),  # Hard-coded for DAWN machines
                         )
                         print_(result_line, file=results)
 
