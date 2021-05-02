@@ -1,8 +1,10 @@
+from ..graph_utils import compute_in_or_out_flow
 from enum import Enum, unique
 import pickle
 import re
 import sys
 
+EPS = 1e-5
 
 @unique
 class Objective(Enum):
@@ -114,6 +116,36 @@ class AbstractFormulation(object):
 
     @property
     def obj_val(self):
-        raise NotImplementedError(
-            "obj_val needs to be implemented in the subclass: {}".format(self.__class__)
-        )
+        if not hasattr(self, "_obj_val"):
+            if self._objective.value == Objective.TOTAL_FLOW.value:
+                self._obj_val = self.total_flow
+            elif self._objective.value == Objective.MAX_CONCURRENT_FLOW.value:
+                self._obj_val = self.min_frac_flow
+            else:
+                raise Exception(
+                    "no support for other Objectives besides TOTAL_FLOW and MAX_CONCURRENT_FLOW"
+                )
+        return self._obj_val
+
+    @property
+    def total_flow(self):
+        if not hasattr(self, "_total_flow"):
+            self._total_flow = 0.0
+            for (_, (s_k, _, _)), flow_list in self.sol_dict.items():
+                self._total_flow += compute_in_or_out_flow(flow_list, 0, {s_k})
+        return self._total_flow
+
+    @property
+    def min_frac_flow(self):
+        if not hasattr(self, "_min_frac_flow") or self.DEBUG:
+            self.frac_flows = {}
+            self._min_frac_flow = 1.0
+            for commod_key, flow_list in self.sol_dict.items():
+                _, (s_k, _, d_k) = commod_key
+                if d_k < EPS:
+                    continue
+                out_flow = compute_in_or_out_flow(flow_list, 0, {s_k})
+                self._min_frac_flow = min(self._min_frac_flow, out_flow / d_k)
+                self.frac_flows[commod_key] = out_flow / d_k
+        return self._min_frac_flow
+

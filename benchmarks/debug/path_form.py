@@ -32,6 +32,7 @@ def run_path_form(args):
         dist_metric=dist_metric,
     )
     pf.solve(problem)
+    print("{}: {}".format(obj, pf.obj_val))
     sol_dict = pf.sol_dict
     check_feasibility(problem, [sol_dict])
     with open("pf-sol-dict.pkl", "wb") as w:

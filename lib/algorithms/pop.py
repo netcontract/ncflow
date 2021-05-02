@@ -189,10 +189,3 @@ class POP(PathFormulation):
     @property
     def runtime(self):
         return sum([pf._solver.model.Runtime for pf in self._pfs])
-
-    @property
-    def obj_val(self):
-        if self._objective == Objective.TOTAL_FLOW:
-            return sum([pf.obj_val for pf in self._pfs])
-        elif self._objective == Objective.MAX_CONCURRENT_FLOW:
-            return min([pf.obj_val for pf in self._pfs])

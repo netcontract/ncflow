@@ -38,6 +38,7 @@ def run_pop(args):
         dist_metric=dist_metric,
     )
     pop.solve(problem)
+    print("{}: {}".format(obj, pop.obj_val))
     sol_dict = pop.sol_dict
     check_feasibility(problem, [sol_dict])
     with open("pop-sol-dict.pkl", "wb") as w:

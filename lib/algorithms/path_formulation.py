@@ -348,7 +348,3 @@ class PathFormulation(AbstractFormulation):
     @property
     def runtime(self):
         return self._solver.model.Runtime
-
-    @property
-    def obj_val(self):
-        return self._solver.model.objVal
