@@ -6,44 +6,39 @@ import copy
 from ...graph_utils import path_to_edge_list
 from kmodes.kprototypes import KPrototypes
 from sklearn.cluster import KMeans
+from .entity_splitting import split_entities
 
 
-def create_edges_onehot_dict(problem, pf_original, num_subproblems):
+def create_edges_onehot_dict(problem, pf_original, num_subproblems, split_fraction=0.1):
     paths_dict = pf_original.get_paths(problem)
-    com_list = problem.commodity_list
-    num_entities = len(com_list)
+    
+    entity_list = [[k, u, v, d] for (k, (u, v, d)) in problem.commodity_list]
+    split_entity_list = split_entities(entity_list, split_fraction)
+
+    num_entities = len(split_entity_list)
     num_edges = len(problem.G.edges)
     enum_edges_dict = {}
     for i, edge in enumerate(problem.G.edges):
         enum_edges_dict[edge] = i
 
-    MAX_DEMAND_THRESHOLD = 100.0/num_subproblems
-
     # create dictionary of all edges used by each commodity
     com_path_edges_dict = defaultdict(list)
     min_demand = np.inf
     max_demand = 0
-    for k, (source, target, demand) in com_list:
+    
+    for ind, [_, source, target, demand] in enumerate(split_entity_list):
         paths_array = paths_dict[(source, target)]
 
-        # determine if we need to split this commodity into several parts
-        num_split_entity = 1
-        if demand > MAX_DEMAND_THRESHOLD:
-            num_split_entity = min(num_subproblems, int(np.ceil(demand/MAX_DEMAND_THRESHOLD)))
-
-        split_demand = demand/num_split_entity
-
-        if min_demand > split_demand:
-            min_demand = split_demand
-        if max_demand < split_demand:
-            max_demand = split_demand
+        if min_demand > demand:
+            min_demand = demand
+        if max_demand < demand:
+            max_demand = demand
 
         # add an entry to the dict for each split, each of which has a fraction of demand
-        for i in range(num_split_entity):
-            for path in paths_array:
-                com_path_edges_dict[(k+i*0.001, source, target, split_demand)] += list(
-                    path_to_edge_list(path)
-                )
+        for path in paths_array:
+            com_path_edges_dict[(ind, source, target, demand)] += list(
+                path_to_edge_list(path)
+            )
     com_path_edges_onehot_dict = defaultdict(list)
     num_entities = len(com_path_edges_dict)
     np_data = np.zeros((num_entities, num_edges + 1))

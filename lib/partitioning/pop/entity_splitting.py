@@ -39,7 +39,6 @@ def split_entities(entity_list, add_fraction):
 
     # creat MaxHeapObject list of entities    
     entity_mho_list = [MaxHeapObj(entity) for entity in entity_list]
-    print(entity_mho_list)
 
     # create heap of maxHeapObjects (a maxheap)
     heapq.heapify(entity_mho_list)
@@ -49,7 +48,6 @@ def split_entities(entity_list, add_fraction):
 
         # split largest entity
         new_entities = halve(largest_entity_mho)
-        print(new_entities)
 
         # add it to heap
         for new_entity in new_entities:

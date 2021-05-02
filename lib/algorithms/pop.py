@@ -30,6 +30,7 @@ class POP(PathFormulation):
         cls,
         num_subproblems,
         split_method,
+        split_fraction,
         num_paths=4,
         edge_disjoint=True,
         dist_metric="inv-cap",
@@ -39,6 +40,7 @@ class POP(PathFormulation):
             objective=Objective.MAX_FLOW,
             num_subproblems=num_subproblems,
             split_method=split_method,
+            split_fraction=split_fraction,
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
@@ -52,6 +54,7 @@ class POP(PathFormulation):
         cls,
         num_subproblems,
         split_method,
+        split_fraction,
         num_paths=4,
         edge_disjoint=True,
         dist_metric="inv-cap",
@@ -61,6 +64,7 @@ class POP(PathFormulation):
             objective=Objective.MIN_MAX_LINK_UTIL,
             num_subproblems=num_subproblems,
             split_method=split_method,
+            split_fraction=split_fraction,
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
@@ -74,6 +78,7 @@ class POP(PathFormulation):
         cls,
         num_subproblems,
         split_method,
+        split_fraction,
         num_paths=4,
         edge_disjoint=True,
         dist_metric="inv-cap",
@@ -83,6 +88,7 @@ class POP(PathFormulation):
             objective=Objective.MAX_CONCURRENT_FLOW,
             num_subproblems=num_subproblems,
             split_method=split_method,
+            split_fraction=split_fraction,
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
@@ -97,6 +103,7 @@ class POP(PathFormulation):
         objective,
         num_subproblems,
         split_method,
+        split_fraction,
         num_paths,
         edge_disjoint,
         dist_metric,
@@ -115,13 +122,14 @@ class POP(PathFormulation):
         )
         self._num_subproblems = num_subproblems
         self._split_method = split_method
+        self._split_fraction = split_fraction
 
     def split_problems(self, problem):
         splitter = None
         if self._split_method == "skewed":
             splitter = BaselineSplitter(self._num_subproblems)
         elif self._split_method == "random":
-            splitter = RandomSplitter(self._num_subproblems)
+            splitter = RandomSplitter(self._num_subproblems, self._split_fraction)
         elif self._split_method in ["tailored", "means", "covs"]:
             pf_original = PathFormulation.get_pf_for_obj(
                 self._objective, self._num_paths
@@ -131,7 +139,7 @@ class POP(PathFormulation):
                 splitter = SmartSplitter(self._num_subproblems, paths_dict)
             else:
                 splitter = GenericSplitter(
-                    self._num_subproblems, pf_original, self._split_method
+                    self._num_subproblems, pf_original, self._split_method, self._split_fraction
                 )
         else:
             raise Exception("Invalid split_method {}".format(self._split_method))

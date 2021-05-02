@@ -62,7 +62,8 @@ def benchmark(problems):
             num_paths, edge_disjoint, dist_metric = PATH_FORM_HYPERPARAMS
 
             NUM_SUBPROBLEMS_SWEEP = [2, 4, 8, 16, 32, 64]
-            SPLIT_METHODS_SWEEP = ["tailored", "skewed", "random", "means", "covs"]
+            SPLIT_METHODS_SWEEP = ["random", "means"]#["tailored", "skewed", "random", "means", "covs"]
+            SPLIT_FRACTION = 0.1
             for num_subproblems, split_method in product(
                 NUM_SUBPROBLEMS_SWEEP, SPLIT_METHODS_SWEEP
             ):
@@ -112,6 +113,7 @@ def benchmark(problems):
                         pop = POP.new_max_flow(
                             num_subproblems,
                             split_method,
+                            SPLIT_FRACTION,
                             num_paths=num_paths,
                             edge_disjoint=edge_disjoint,
                             dist_metric=dist_metric,

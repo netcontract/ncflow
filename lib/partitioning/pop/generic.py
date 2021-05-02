@@ -1,16 +1,16 @@
 from .abstract_pop_splitter import AbstractPOPSplitter
 from .utils import create_edges_onehot_dict, split_generic
 
-
 class GenericSplitter(AbstractPOPSplitter):
-    def __init__(self, num_subproblems, pf, method="means", verbose=False):
+    def __init__(self, num_subproblems, pf, method="means", split_fraction=0.1, verbose=False):
         super().__init__(num_subproblems)
         self._pf = pf
         self.verbose = verbose
         self.method = method
+        self.split_fraction = split_fraction
 
     def split(self, problem):
-        input_dict = create_edges_onehot_dict(problem, self._pf, self._num_subproblems)
+        input_dict = create_edges_onehot_dict(problem, self._pf, self._num_subproblems, self.split_fraction)
 
         # create subproblems, zero out commodities in traffic matrix that aren't assigned to each
         sub_problems = [problem.copy() for _ in range(self._num_subproblems)]
