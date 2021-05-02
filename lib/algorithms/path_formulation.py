@@ -282,25 +282,26 @@ class PathFormulation(AbstractFormulation):
 
     @property
     def sol_dict(self):
-        sol_dict_def = defaultdict(list)
-        for var in self.model.getVars():
-            if var.varName.startswith("f[") and var.x != 0.0:
-                match = re.match(r"f\[(\d+)\]", var.varName)
-                p = int(match.group(1))
-                sol_dict_def[self.commodity_list[self._path_to_commod[p]]] += [
-                    (edge, var.x) for edge in path_to_edge_list(self._all_paths[p])
-                ]
+        if not hasattr(self, "_sol_dict"):
+            sol_dict_def = defaultdict(list)
+            for var in self.model.getVars():
+                if var.varName.startswith("f[") and var.x != 0.0:
+                    match = re.match(r"f\[(\d+)\]", var.varName)
+                    p = int(match.group(1))
+                    sol_dict_def[self.commodity_list[self._path_to_commod[p]]] += [
+                        (edge, var.x) for edge in path_to_edge_list(self._all_paths[p])
+                    ]
 
-        # Set zero-flow commodities to be empty lists
-        sol_dict = {}
-        sol_dict_def = dict(sol_dict_def)
-        for commod_key in self.problem.commodity_list:
-            if commod_key in sol_dict_def:
-                sol_dict[commod_key] = sol_dict_def[commod_key]
-            else:
-                sol_dict[commod_key] = []
+            # Set zero-flow commodities to be empty lists
+            self._sol_dict = {}
+            sol_dict_def = dict(sol_dict_def)
+            for commod_key in self.problem.commodity_list:
+                if commod_key in sol_dict_def:
+                    self._sol_dict[commod_key] = sol_dict_def[commod_key]
+                else:
+                    self._sol_dict[commod_key] = []
 
-        return sol_dict
+        return self._sol_dict
 
     @property
     def sol_mat(self):
@@ -347,4 +348,6 @@ class PathFormulation(AbstractFormulation):
 
     @property
     def runtime(self):
-        return self._solver.model.Runtime
+        if not hasattr(self, "_runtime"):
+            self._runtime = self._solver.model.Runtime
+        return self._runtime

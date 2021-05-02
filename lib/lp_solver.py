@@ -9,7 +9,7 @@ class Method(Enum):
     DUAL_SIMPLEX = 1
     BARRIER = 2
     CONCURRENT = 3
-    PRIMAL_AND_DUAL = 5
+    PRIMAL_AND_DUAL = 4
 
 
 class LpSolver(object):
@@ -42,12 +42,13 @@ class LpSolver(object):
     # Note: this is not idempotent: the `model` parameter will be changed after invoking
     # this function
     def solve_lp(
-        self, method=Method.CONCURRENT, bar_tol=None, err_tol=None, numeric_focus=False
+        self, num_threads=None, bar_tol=None, err_tol=None, numeric_focus=False
     ):
         model = self._model
         if numeric_focus:
             model.setParam("NumericFocus", 1)
-        model.setParam("Method", method.value)
+        if num_threads:
+            model.setParam("Threads", num_threads)
         model.setParam("LogFile", self.gurobi_out)
         try:
             if bar_tol:

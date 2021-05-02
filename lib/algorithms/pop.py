@@ -13,6 +13,7 @@ from .abstract_formulation import Objective
 from .path_formulation import PathFormulation
 from gurobipy import GRB, Model, quicksum
 from collections import defaultdict
+from pathos import multiprocessing
 import numpy as np
 import math
 import random
@@ -150,6 +151,12 @@ class POP(PathFormulation):
     # Override superclass methods #
     ###############################
 
+    def solve_subproblem(self, index):
+        pf = self._pfs[index]
+        subproblem = self._subproblem_list[index]
+        pf.solve(subproblem, num_threads=1)
+        return (pf.runtime, pf.sol_dict)
+
     def solve(self, problem):
         self._problem = problem
         self._subproblem_list = self.split_problems(problem)
@@ -157,8 +164,11 @@ class POP(PathFormulation):
             PathFormulation.get_pf_for_obj(self._objective, self._num_paths)
             for subproblem in self._subproblem_list
         ]
-        for subproblem, pf in zip(self._subproblem_list, self._pfs):
-            pf.solve(subproblem)
+        pool = multiprocessing.ProcessPool(self._num_subproblems)
+        results = pool.map(self.solve_subproblem, range(self._num_subproblems))
+        for (runtime, sol_dict), pf in zip(results, self._pfs):
+            pf._runtime = runtime
+            pf._sol_dict = sol_dict
 
     @property
     def sol_dict(self):
@@ -183,9 +193,9 @@ class POP(PathFormulation):
 
     def runtime_est(self, num_threads):
         return parallelized_rt(
-            [pf._solver.model.Runtime for pf in self._pfs], num_threads
+            [pf.runtime for pf in self._pfs], num_threads
         )
 
     @property
     def runtime(self):
-        return sum([pf._solver.model.Runtime for pf in self._pfs])
+        return sum([pf.runtime for pf in self._pfs])
