@@ -26,10 +26,10 @@ EPS = 1e-5
 
 class NCFlowSingleIter(NCFlowAbstract):
     @classmethod
-    def new_max_flow(cls, out=None):
+    def new_total_flow(cls, out=None):
         if out is None:
             out = sys.stdout
-        return cls(objective=Objective.MAX_FLOW, DEBUG=False, VERBOSE=False, out=out)
+        return cls(objective=Objective.TOTAL_FLOW, DEBUG=False, VERBOSE=False, out=out)
 
     def __init__(self, *, objective, DEBUG, VERBOSE, out):
         super().__init__(objective, DEBUG=DEBUG, VERBOSE=VERBOSE, out=out)

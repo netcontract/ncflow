@@ -16,11 +16,25 @@ PATHS_DIR = os.path.join(TOPOLOGIES_DIR, "paths", "path-form")
 
 class PathFormulation(AbstractFormulation):
     @classmethod
-    def new_max_flow(
+    def new_total_flow(
         cls, num_paths, edge_disjoint=True, dist_metric="inv-cap", out=None
     ):
         return cls(
-            objective=Objective.MAX_FLOW,
+            objective=Objective.TOTAL_FLOW,
+            num_paths=num_paths,
+            edge_disjoint=edge_disjoint,
+            dist_metric=dist_metric,
+            DEBUG=True,
+            VERBOSE=False,
+            out=out,
+        )
+
+    @classmethod
+    def new_max_concurrent_flow(
+        cls, num_paths, edge_disjoint=True, dist_metric="inv-cap", out=None
+    ):
+        return cls(
+            objective=Objective.MAX_CONCURRENT_FLOW,
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
@@ -59,8 +73,10 @@ class PathFormulation(AbstractFormulation):
 
     @classmethod
     def get_pf_for_obj(cls, objective, num_paths, **kargs):
-        if objective == Objective.MAX_FLOW:
-            return cls.new_max_flow(num_paths, **kargs)
+        if objective == Objective.TOTAL_FLOW:
+            return cls.new_total_flow(num_paths, **kargs)
+        elif objective == Objective.MAX_CONCURRENT_FLOW:
+            return cls.new_max_concurrent_flow(num_paths, **kargs)
         elif objective == Objective.MIN_MAX_LINK_UTIL:
             return cls.new_min_max_link_util(num_paths, **kargs)
         elif objective == Objective.COMPUTE_DEMAND_SCALE_FACTOR:
@@ -75,8 +91,8 @@ class PathFormulation(AbstractFormulation):
         num_paths,
         edge_disjoint,
         dist_metric,
-        DEBUG,
-        VERBOSE,
+        DEBUG=True,
+        VERBOSE=False,
         out=None
     ):
         super().__init__(objective, DEBUG, VERBOSE, out)
@@ -133,8 +149,8 @@ class PathFormulation(AbstractFormulation):
                 )
 
         else:
-            if self._objective == Objective.MAX_FLOW:
-                self._print("MAX FLOW objective")
+            if self._objective == Objective.TOTAL_FLOW:
+                self._print("TOTAL FLOW objective")
                 obj = quicksum(path_vars)
             elif self._objective == Objective.MAX_CONCURRENT_FLOW:
                 self._print("MAX CONCURRENT FLOW objective")
@@ -305,7 +321,7 @@ class PathFormulation(AbstractFormulation):
     # NOTE: problem has to have a full TM matrix
     def fib_entries(cls, problem, num_paths, edge_disjoint, dist_metric):
         assert problem.is_traffic_matrix_full
-        pf = cls.new_max_flow(
+        pf = cls.new_total_flow(
             num_paths=num_paths, edge_disjoint=edge_disjoint, dist_metric=dist_metric
         )
         pf.pre_solve(problem)

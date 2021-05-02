@@ -26,7 +26,7 @@ PATHS_DIR = os.path.join(TOPOLOGIES_DIR, "paths", "path-form")
 
 class POP(PathFormulation):
     @classmethod
-    def new_max_flow(
+    def new_total_flow(
         cls,
         num_subproblems,
         split_method,
@@ -37,7 +37,7 @@ class POP(PathFormulation):
         out=None,
     ):
         return cls(
-            objective=Objective.MAX_FLOW,
+            objective=Objective.TOTAL_FLOW,
             num_subproblems=num_subproblems,
             split_method=split_method,
             split_fraction=split_fraction,
@@ -104,12 +104,12 @@ class POP(PathFormulation):
         num_subproblems,
         split_method,
         split_fraction,
-        num_paths,
-        edge_disjoint,
-        dist_metric,
-        DEBUG,
-        VERBOSE,
-        out=None
+        num_paths=4,
+        edge_disjoint=True,
+        dist_metric="inv-cap",
+        DEBUG=True,
+        VERBOSE=False,
+        out=None,
     ):
         super().__init__(
             objective=objective,
@@ -192,7 +192,7 @@ class POP(PathFormulation):
 
     @property
     def obj_val(self):
-        if self._objective == Objective.MAX_FLOW:
-            return sum([pf._solver.model.objVal for pf in self._pfs])
+        if self._objective == Objective.TOTAL_FLOW:
+            return sum([pf.obj_val for pf in self._pfs])
         elif self._objective == Objective.MAX_CONCURRENT_FLOW:
-            return min([pf._solver.model.objVal for pf in self._pfs])
+            return min([pf.obj_val for pf in self._pfs])

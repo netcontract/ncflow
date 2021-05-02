@@ -10,7 +10,7 @@ import sys
 
 sys.path.append("..")
 
-from lib.algorithms import POP
+from lib.algorithms import POP, Objective
 from lib.problem import Problem
 
 
@@ -30,6 +30,7 @@ HEADERS = [
     "total_demand",
     "algo",
     "split_method",
+    "split_fraction",
     "num_subproblems",
     "num_paths",
     "edge_disjoint",
@@ -41,7 +42,7 @@ HEADERS = [
 PLACEHOLDER = ",".join("{}" for _ in HEADERS)
 
 
-def benchmark(problems):
+def benchmark(problems, obj):
 
     with open(OUTPUT_CSV, "a") as results:
         print_(",".join(HEADERS), file=results)
@@ -62,7 +63,10 @@ def benchmark(problems):
             num_paths, edge_disjoint, dist_metric = PATH_FORM_HYPERPARAMS
 
             NUM_SUBPROBLEMS_SWEEP = [2, 4, 8, 16, 32, 64]
-            SPLIT_METHODS_SWEEP = ["random", "means"]#["tailored", "skewed", "random", "means", "covs"]
+            SPLIT_METHODS_SWEEP = [
+                "random",
+                "means",
+            ]  # ["tailored", "skewed", "random", "means", "covs"]
             SPLIT_FRACTION = 0.1
             for num_subproblems, split_method in product(
                 NUM_SUBPROBLEMS_SWEEP, SPLIT_METHODS_SWEEP
@@ -77,7 +81,8 @@ def benchmark(problems):
 
                 try:
                     print_(
-                        "\nPOP, {} split method, {} subproblems, {} paths, edge disjoint {}, dist metric {}".format(
+                        "\nPOP, objective {}, {} split method, {} subproblems, {} paths, edge disjoint {}, dist metric {}".format(
+                            obj,
                             split_method,
                             num_subproblems,
                             num_paths,
@@ -88,6 +93,7 @@ def benchmark(problems):
                     run_pop_dir = os.path.join(
                         run_dir,
                         "pop",
+                        obj,
                         split_method,
                         "{}-partitions".format(num_subproblems),
                         "{}-paths".format(num_paths),
@@ -99,8 +105,9 @@ def benchmark(problems):
                     with open(
                         os.path.join(
                             run_pop_dir,
-                            "{}-pop-split-method_{}-{}_partitions-{}_paths-edge_disjoint_{}-dist_metric_{}.txt".format(
+                            "{}-pop-objective_{}-split-method_{}-{}_partitions-{}_paths-edge_disjoint_{}-dist_metric_{}.txt".format(
                                 problem.name,
+                                obj,
                                 split_method,
                                 num_subproblems,
                                 num_paths,
@@ -110,10 +117,11 @@ def benchmark(problems):
                         ),
                         "w",
                     ) as log:
-                        pop = POP.new_max_flow(
-                            num_subproblems,
-                            split_method,
-                            SPLIT_FRACTION,
+                        pop = POP(
+                            objective=Objective.get_obj_from_str(obj),
+                            num_subproblems=num_subproblems,
+                            split_method=split_method,
+                            split_fraction=SPLIT_FRACTION,
                             num_paths=num_paths,
                             edge_disjoint=edge_disjoint,
                             dist_metric=dist_metric,
@@ -135,11 +143,12 @@ def benchmark(problems):
                             total_demand,
                             "pop",
                             split_method,
+                            SPLIT_FRACTION,
                             num_subproblems,
                             num_paths,
                             edge_disjoint,
                             dist_metric,
-                            "max_flow",
+                            obj,
                             pop.obj_val,
                             pop.runtime_est(28),  # Hard-coded for DAWN machines
                         )
@@ -147,7 +156,8 @@ def benchmark(problems):
 
                 except:
                     print_(
-                        "POP split method {}, {} subproblems, {} paths, Problem {}, traffic seed {}, traffic model {} failed".format(
+                        "POP, objective {}, split method {}, {} subproblems, {} paths, Problem {}, traffic seed {}, traffic model {} failed".format(
+                            obj,
                             split_method,
                             num_subproblems,
                             num_paths,
@@ -170,4 +180,4 @@ if __name__ == "__main__":
         for problem in problems:
             print(problem)
     else:
-        benchmark(problems)
+        benchmark(problems, args.obj)

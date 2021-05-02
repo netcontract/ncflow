@@ -28,9 +28,9 @@ class SMORE(AbstractFormulation):
         )
 
     @classmethod
-    def new_max_flow(cls, num_paths, out=sys.stdout):
+    def new_total_flow(cls, num_paths, out=sys.stdout):
         return cls(
-            objective=Objective.MAX_FLOW,
+            objective=Objective.TOTAL_FLOW,
             num_paths=num_paths,
             DEBUG=True,
             VERBOSE=False,
@@ -41,8 +41,8 @@ class SMORE(AbstractFormulation):
         super().__init__(objective, DEBUG, VERBOSE, out)
         self._num_paths = num_paths
 
-    def _construct_max_flow_lp(self, G, edge_to_paths, num_total_paths):
-        m = Model("max-flow")
+    def _construct_total_flow_lp(self, G, edge_to_paths, num_total_paths):
+        m = Model("total-flow")
 
         # Create variables: one for each path
         path_vars = m.addVars(num_total_paths, vtype=GRB.CONTINUOUS, lb=0.0, name="f")
@@ -175,9 +175,9 @@ class SMORE(AbstractFormulation):
 
     def _construct_lp(self, sat_flows=[]):
         edge_to_paths, num_paths = self.pre_solve()
-        if self._objective == Objective.MAX_FLOW:
-            self._print("Constructing Max Flow LP")
-            return self._construct_max_flow_lp(self.problem.G, edge_to_paths, num_paths)
+        if self._objective == Objective.TOTAL_FLOW:
+            self._print("Constructing Total Flow LP")
+            return self._construct_total_flow_lp(self.problem.G, edge_to_paths, num_paths)
         elif self._objective == Objective.MIN_MAX_LINK_UTIL:
             self._print("Constructing SMORE LP")
             return self._construct_smore_lp(self.problem.G, edge_to_paths, num_paths)
@@ -230,7 +230,7 @@ class SMORE(AbstractFormulation):
 
     @property
     def total_flow(self):
-        if self._objective == Objective.MAX_FLOW:
+        if self._objective == Objective.TOTAL_FLOW:
             return self.obj_val
         else:
             sol_dict = self.sol_dict()

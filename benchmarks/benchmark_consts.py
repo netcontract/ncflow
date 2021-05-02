@@ -105,6 +105,7 @@ def get_problems(args):
 def get_args_and_problems():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", default=False)
+    parser.add_argument("--obj", type=str, choices=["total_flow", "mcf"])
     parser.add_argument(
         "--slices", type=int, choices=range(5), nargs="+", required=True
     )

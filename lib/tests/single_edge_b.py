@@ -14,7 +14,7 @@ class SingleEdgeBTest(AbstractTest):
         return "SingleEdgeB"
 
     def run(self):
-        ncf = NcfEpi.new_max_flow(4, verbose=True)
+        ncf = NcfEpi.new_total_flow(4, verbose=True)
         hc = HardCodedPartitioning(partition_vector=[0, 0, 1, 1, 1, 1, 2, 2])
         ncf.solve(self.problem, hc)
         print(ncf.obj_val)

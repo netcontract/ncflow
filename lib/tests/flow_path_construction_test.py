@@ -17,7 +17,7 @@ class FlowPathConstructionTest(AbstractTest):
         return "flow-path-construction"
 
     def run(self):
-        ncf = NcfEpi.new_max_flow(4)
+        ncf = NcfEpi.new_total_flow(4)
         hc = HardCodedPartitioning(partition_vector=[0, 0, 1, 1, 2, 2])
         ncf.solve(self.problem, hc)
 

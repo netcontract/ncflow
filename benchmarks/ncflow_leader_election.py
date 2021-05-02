@@ -124,7 +124,7 @@ def benchmark(problems):
                     ),
                     "w",
                 ) as log:
-                    ncflow = NcfEpi.new_max_flow(
+                    ncflow = NcfEpi.new_total_flow(
                         num_paths,
                         edge_disjoint=edge_disjoint,
                         dist_metric=dist_metric,

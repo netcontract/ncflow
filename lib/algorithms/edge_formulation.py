@@ -40,8 +40,8 @@ EPS2 = 1e-2
 
 class EdgeFormulation(AbstractFormulation):
     @classmethod
-    def new_max_flow(cls, out=None):
-        return cls(objective=Objective.MAX_FLOW, DEBUG=True, VERBOSE=True, out=out)
+    def new_total_flow(cls, out=None):
+        return cls(objective=Objective.TOTAL_FLOW, DEBUG=True, VERBOSE=True, out=out)
 
     def __init__(self, objective, *, DEBUG, VERBOSE, out=None):
         super().__init__(objective, DEBUG, VERBOSE, out)
@@ -104,8 +104,8 @@ class EdgeFormulation(AbstractFormulation):
             self.debug_fn = None
 
         # Set objective
-        if self._objective == Objective.MAX_FLOW:
-            self._print("MAX FLOW objective")
+        if self._objective == Objective.TOTAL_FLOW:
+            self._print("TOTAL FLOW objective")
             obj = (
                 quicksum(
                     [

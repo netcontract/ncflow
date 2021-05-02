@@ -44,7 +44,7 @@ def generate_sequence_of_tms(
 class PFWarmStart(object):
     def __init__(self):
         num_paths, edge_disjoint, dist_metric = PATH_FORM_HYPERPARAMS
-        self.pf_warm = PathFormulation.new_max_flow(
+        self.pf_warm = PathFormulation.new_total_flow(
             num_paths=num_paths, edge_disjoint=edge_disjoint, dist_metric=dist_metric
         )
         self.pf_warm._warm_start_mode = True
@@ -73,7 +73,7 @@ class PFWarmStart(object):
 class PF(object):
     def __init__(self):
         num_paths, edge_disjoint, dist_metric = PATH_FORM_HYPERPARAMS
-        self.pf = PathFormulation.new_max_flow(
+        self.pf = PathFormulation.new_total_flow(
             num_paths=num_paths, edge_disjoint=edge_disjoint, dist_metric=dist_metric
         )
 
@@ -99,7 +99,7 @@ class NcI(object):
             problems[0].name
         ]
         num_parts = sf * int(np.sqrt(len(G)))
-        self.ncflow = NcfEpi.new_max_flow(
+        self.ncflow = NcfEpi.new_total_flow(
             num_paths=num_paths, edge_disjoint=edge_disjoint, dist_metric=dist_metric
         )
         self.partitioner = partition_cls(num_parts)

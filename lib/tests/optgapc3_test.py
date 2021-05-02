@@ -19,7 +19,7 @@ class OptGapC3Test(AbstractTest):
         return "optgapc3"
 
     def run(self):
-        ncf = NcfEpi.new_max_flow(4)
+        ncf = NcfEpi.new_total_flow(4)
         hc = HardCodedPartitioning(partition_vector=[0, 0, 1, 2, 2, 3, 4])
         ncf.solve(self.problem, hc)
 

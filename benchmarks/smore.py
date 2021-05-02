@@ -58,7 +58,7 @@ def benchmark(problems):
                 with open(
                     os.path.join(run_dir, "{}-smore.txt".format(problem.name)), "w"
                 ) as log:
-                    smore = SMORE.new_max_flow(num_paths=4, out=log)
+                    smore = SMORE.new_total_flow(num_paths=4, out=log)
                     smore.solve(problem)
                     smore_sol_dict = smore.sol_dict
                     pickle.dump(

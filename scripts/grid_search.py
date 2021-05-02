@@ -87,7 +87,7 @@ def grid_search(
                 continue
 
             try:
-                ncflow = NcfEpi.new_max_flow(num_paths,
+                ncflow = NcfEpi.new_total_flow(num_paths,
                                              edge_disjoint=edge_disjoint,
                                              dist_metric=dist_metric,
                                              out=log)

@@ -32,11 +32,11 @@ class NCFlowEdgePerIter(AbstractFormulation):
     MAX_NUM_ITERS = 6
 
     @classmethod
-    def new_max_flow(
+    def new_total_flow(
         cls, num_paths, edge_disjoint=True, dist_metric="inv-cap", out=None, **args
     ):
         return cls(
-            objective=Objective.MAX_FLOW,
+            objective=Objective.TOTAL_FLOW,
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
@@ -666,11 +666,11 @@ class NCFlowEdgePerIter(AbstractFormulation):
 
         self.num_iters = iter + 1
 
-        if self._objective == Objective.MAX_FLOW:
+        if self._objective == Objective.TOTAL_FLOW:
             self._obj_val = sum(nc.obj_val for nc in self._ncflows)
         else:
             raise Exception(
-                "no support for other Objectives besides Objective.MAX_FLOW"
+                "no support for other Objectives besides Objective.TOTAL_FLOW"
             )
 
         return self._obj_val
@@ -754,7 +754,7 @@ class NCFlowEdgePerIter(AbstractFormulation):
     # will have a problem
     def fib_entries(cls, problem, partitioner, num_paths, edge_disjoint, dist_metric):
         assert problem.is_traffic_matrix_full
-        ncflow = cls.new_max_flow(
+        ncflow = cls.new_total_flow(
             num_paths=num_paths, edge_disjoint=edge_disjoint, dist_metric=dist_metric
         )
         ncflow.pre_solve(problem, partitioner)

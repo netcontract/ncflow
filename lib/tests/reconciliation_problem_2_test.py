@@ -14,7 +14,7 @@ class ReconciliationProblem2Test(AbstractTest):
         return "recon2"
 
     def run(self):
-        ncf = NcfEpi.new_max_flow(4)
+        ncf = NcfEpi.new_total_flow(4)
         hc = HardCodedPartitioning(partition_vector=[0, 0, 1, 1])
         ncf.solve(self.problem, hc)
 

@@ -10,7 +10,7 @@ import sys
 
 sys.path.append("..")
 
-from lib.algorithms import PathFormulation
+from lib.algorithms import PathFormulation, Objective
 from lib.problem import Problem
 
 TOP_DIR = "path-form-logs"
@@ -36,7 +36,7 @@ PLACEHOLDER = ",".join("{}" for _ in HEADERS)
 
 # Sweep topos and traffic matrices for that topo. For each combo, record the
 # runtime and total flow for each algorithm
-def benchmark(problems):
+def benchmark(problems, obj):
     num_paths, edge_disjoint, dist_metric = PATH_FORM_HYPERPARAMS
     with open("path-form.csv", "a") as results:
         print_(",".join(HEADERS), file=results)
@@ -62,21 +62,22 @@ def benchmark(problems):
 
             try:
                 print_(
-                    "\nPath formulation, {} paths, edge disjoint {}, dist metric {}".format(
-                        num_paths, edge_disjoint, dist_metric
+                    "\nPath formulation, objective {}, {} paths, edge disjoint {}, dist metric {}".format(
+                        obj, num_paths, edge_disjoint, dist_metric
                     )
                 )
                 with open(
                     os.path.join(
                         run_dir,
-                        "{}-path-formulation_{}-paths_edge-disjoint-{}_dist-metric-{}.txt".format(
-                            problem_name, num_paths, edge_disjoint, dist_metric
+                        "{}-path-formulation_objective-{}_{}-paths_edge-disjoint-{}_dist-metric-{}.txt".format(
+                            problem_name, obj, num_paths, edge_disjoint, dist_metric
                         ),
                     ),
                     "w",
                 ) as log:
-                    pf = PathFormulation.new_max_flow(
-                        num_paths,
+                    pf = PathFormulation(
+                        objective=Objective.get_obj_from_str(obj),
+                        num_paths=num_paths,
                         edge_disjoint=edge_disjoint,
                         dist_metric=dist_metric,
                         out=log,
@@ -86,8 +87,8 @@ def benchmark(problems):
                     with open(
                         os.path.join(
                             run_dir,
-                            "{}-path-formulation_{}-paths_edge-disjoint-{}_dist-metric-{}_sol-dict.pkl".format(
-                                problem_name, num_paths, edge_disjoint, dist_metric
+                            "{}-path-formulation_objective-{}_{}-paths_edge-disjoint-{}_dist-metric-{}_sol-dict.pkl".format(
+                                problem_name, obj, num_paths, edge_disjoint, dist_metric
                             ),
                         ),
                         "wb",
@@ -107,7 +108,7 @@ def benchmark(problems):
                     num_paths,
                     edge_disjoint,
                     dist_metric,
-                    "max_flow",
+                    obj,
                     pf.obj_val,
                     pf.runtime,
                 )
@@ -115,7 +116,8 @@ def benchmark(problems):
 
             except Exception:
                 print_(
-                    "Path formulation {} paths, edge disjoint {}, dist metric {}, Problem {}, traffic seed {}, traffic model {} failed".format(
+                    "Path formulation, objective {}, {} paths, edge disjoint {}, dist metric {}, Problem {}, traffic seed {}, traffic model {} failed".format(
+                        obj,
                         num_paths,
                         edge_disjoint,
                         dist_metric,
@@ -138,4 +140,4 @@ if __name__ == "__main__":
         for problem in problems:
             print(problem)
     else:
-        benchmark(problems)
+        benchmark(problems, args.obj)

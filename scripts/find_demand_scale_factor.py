@@ -57,7 +57,7 @@ with open(d_fname, 'r') as input_file:
         z = pf_cdsf.obj_val
 
         # compute pf solution and runtime
-        pf = PF.new_max_flow(4, edge_disjoint=True)
+        pf = PF.new_total_flow(4, edge_disjoint=True)
         pf.solve(p)
         pf_flow = pf.obj_val
         pf_runtime = pf.runtime
@@ -81,7 +81,7 @@ with open(d_fname, 'r') as input_file:
 
             partitioner = partition_algo(num_partitions)
 
-            ncflow = NcfEpi.new_max_flow(num_paths,
+            ncflow = NcfEpi.new_total_flow(num_paths,
                                          edge_disjoint=True,
                                          dist_metric='inv-cap')
             begin = datetime.datetime.now()
