@@ -11,6 +11,7 @@ import sys
 
 sys.path.append("..")
 
+from lib.constants import NUM_CORES
 from lib.algorithms import NcfEpi
 from lib.problem import Problem
 
@@ -154,7 +155,7 @@ def benchmark(problems):
                             recon_runtime,
                             r3_runtime,
                             kirchoffs_runtime,
-                        ) = nc.runtime_est(28, breakdown=True) # Hard-coded for DAWN machines
+                        ) = nc.runtime_est(NUM_CORES, breakdown=True)
                         runtime = (
                             r1_runtime
                             + r2_runtime

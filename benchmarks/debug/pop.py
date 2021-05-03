@@ -36,6 +36,7 @@ def run_pop(args):
         num_paths=num_paths,
         edge_disjoint=edge_disjoint,
         dist_metric=dist_metric,
+        DEBUG=True,
     )
     pop.solve(problem)
     print("{}: {}".format(obj, pop.obj_val))

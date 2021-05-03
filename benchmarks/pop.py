@@ -10,6 +10,7 @@ import sys
 
 sys.path.append("..")
 
+from lib.constants import NUM_CORES
 from lib.algorithms import POP, Objective
 from lib.problem import Problem
 
@@ -150,7 +151,7 @@ def benchmark(problems, obj):
                             dist_metric,
                             obj,
                             pop.obj_val,
-                            pop.runtime_est(28),  # Hard-coded for DAWN machines
+                            pop.runtime_est(NUM_CORES),
                         )
                         print_(result_line, file=results)
 

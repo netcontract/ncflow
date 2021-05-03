@@ -5,6 +5,7 @@ from ..partitioning.pop import (
     GenericSplitter,
     RandomSplitter,
 )
+from ..constants import NUM_CORES
 from ..runtime_utils import parallelized_rt
 from ..graph_utils import path_to_edge_list
 from ..path_utils import find_paths, graph_copy_with_edge_weights, remove_cycles
@@ -45,7 +46,7 @@ class POP(PathFormulation):
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
-            DEBUG=True,
+            DEBUG=False,
             VERBOSE=False,
             out=out,
         )
@@ -69,7 +70,7 @@ class POP(PathFormulation):
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
-            DEBUG=True,
+            DEBUG=False,
             VERBOSE=False,
             out=out,
         )
@@ -93,7 +94,7 @@ class POP(PathFormulation):
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
-            DEBUG=True,
+            DEBUG=False,
             VERBOSE=False,
             out=out,
         )
@@ -108,7 +109,7 @@ class POP(PathFormulation):
         num_paths=4,
         edge_disjoint=True,
         dist_metric="inv-cap",
-        DEBUG=True,
+        DEBUG=False,
         VERBOSE=False,
         out=None,
     ):
@@ -154,7 +155,7 @@ class POP(PathFormulation):
     def solve_subproblem(self, index):
         pf = self._pfs[index]
         subproblem = self._subproblem_list[index]
-        pf.solve(subproblem, num_threads=1)
+        pf.solve(subproblem, num_threads=max(NUM_CORES // self._num_subproblems, 1)) # Force Gurobi to use a single thread
         return (pf.runtime, pf.sol_dict)
 
     def solve(self, problem):
@@ -164,11 +165,15 @@ class POP(PathFormulation):
             PathFormulation.get_pf_for_obj(self._objective, self._num_paths)
             for subproblem in self._subproblem_list
         ]
-        pool = multiprocessing.ProcessPool(self._num_subproblems)
-        results = pool.map(self.solve_subproblem, range(self._num_subproblems))
-        for (runtime, sol_dict), pf in zip(results, self._pfs):
-            pf._runtime = runtime
-            pf._sol_dict = sol_dict
+        if self.DEBUG:
+            for pf, subproblem in zip(self._pfs, self._subproblem_list):
+                pf.solve(subproblem)
+        else:
+            pool = multiprocessing.ProcessPool(self._num_subproblems)
+            results = pool.map(self.solve_subproblem, range(self._num_subproblems))
+            for (runtime, sol_dict), pf in zip(results, self._pfs):
+                pf._runtime = runtime
+                pf._sol_dict = sol_dict
 
     @property
     def sol_dict(self):

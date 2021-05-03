@@ -24,7 +24,7 @@ class PathFormulation(AbstractFormulation):
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
-            DEBUG=True,
+            DEBUG=False,
             VERBOSE=False,
             out=out,
         )
@@ -38,7 +38,7 @@ class PathFormulation(AbstractFormulation):
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
-            DEBUG=True,
+            DEBUG=False,
             VERBOSE=False,
             out=out,
         )
@@ -52,7 +52,7 @@ class PathFormulation(AbstractFormulation):
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
-            DEBUG=True,
+            DEBUG=False,
             VERBOSE=False,
             out=out,
         )
@@ -66,7 +66,7 @@ class PathFormulation(AbstractFormulation):
             num_paths=num_paths,
             edge_disjoint=edge_disjoint,
             dist_metric=dist_metric,
-            DEBUG=True,
+            DEBUG=False,
             VERBOSE=False,
             out=out,
         )
@@ -91,7 +91,7 @@ class PathFormulation(AbstractFormulation):
         num_paths,
         edge_disjoint,
         dist_metric,
-        DEBUG=True,
+        DEBUG=False,
         VERBOSE=False,
         out=None
     ):

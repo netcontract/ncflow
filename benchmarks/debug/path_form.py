@@ -30,6 +30,7 @@ def run_path_form(args):
         num_paths=num_paths,
         edge_disjoint=edge_disjoint,
         dist_metric=dist_metric,
+        DEBUG=True
     )
     pf.solve(problem)
     print("{}: {}".format(obj, pf.obj_val))
