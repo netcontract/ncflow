@@ -34,6 +34,8 @@ def halve(entity_mho):
 # split the max entities in half until add_fraction new entities are formed
 def split_entities(entity_list, add_fraction):
 
+    print("splitting for additional " + str(add_fraction) + " entities")
+
     num_entities = len(entity_list)
     num_new_entities = np.round(num_entities*add_fraction)
 
