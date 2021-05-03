@@ -63,7 +63,7 @@ def benchmark(problems, obj):
 
             num_paths, edge_disjoint, dist_metric = PATH_FORM_HYPERPARAMS
 
-            NUM_SUBPROBLEMS_SWEEP = [2, 4, 8, 16, 32, 64]
+            NUM_SUBPROBLEMS_SWEEP = [4, 16, 32]  # [2, 4, 8, 16, 32, 64]
             SPLIT_METHODS_SWEEP = [
                 "random",
                 "means",
