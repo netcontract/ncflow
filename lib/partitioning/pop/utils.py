@@ -13,7 +13,12 @@ def create_edges_onehot_dict(problem, pf_original, num_subproblems, split_fracti
     paths_dict = pf_original.get_paths(problem)
     
     entity_list = [[k, u, v, d] for (k, (u, v, d)) in problem.commodity_list]
-    split_entity_list = split_entities(entity_list, split_fraction)
+    split_entity_lists = split_entities(entity_list, split_fraction)
+
+    # compose single list from all split entity lists
+    split_entity_list = []
+    for split_entity in split_entity_lists:
+        split_entity_list += split_entity
 
     num_entities = len(split_entity_list)
     num_edges = len(problem.G.edges)

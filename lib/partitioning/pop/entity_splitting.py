@@ -12,7 +12,7 @@ class MaxHeapObj(object):
         return self.entity[-1] > other.entity[-1]
 
     def __eq__(self, other):
-        return self.val == other.val
+        return self.entity == other
 
     def __str__(self):
         return str(self.entity)
@@ -31,7 +31,9 @@ def halve(entity_mho):
 
     return halved_entities_mho
 
-# split the max entities in half until add_fraction new entities are formed
+# Split the max entities in half (on last dimension)
+# until add_fraction new entities are formed.
+# Return a list of lists containing all splits of each entity
 def split_entities(entity_list, add_fraction):
 
     print("splitting for additional " + str(add_fraction) + " entities")
@@ -39,9 +41,14 @@ def split_entities(entity_list, add_fraction):
     num_entities = len(entity_list)
     num_new_entities = np.round(num_entities*add_fraction)
 
+    # use dict to keep track of all splits of each original entity
+    entity_splits_dict = {}
+    for entity in entity_list:
+        entity_splits_dict[tuple(entity[:-1])] = [entity]
+
     # creat MaxHeapObject list of entities    
     entity_mho_list = [MaxHeapObj(entity) for entity in entity_list]
-
+    
     # create heap of maxHeapObjects (a maxheap)
     heapq.heapify(entity_mho_list)
 
@@ -50,11 +57,20 @@ def split_entities(entity_list, add_fraction):
 
         # split largest entity
         new_entities = halve(largest_entity_mho)
-
+        
         # add it to heap
         for new_entity in new_entities:
             heapq.heappush(entity_mho_list, new_entity)
 
-    resulting_entity_list = [entity_mho.get_entity() for entity_mho in entity_mho_list]
+        # update splits dict
+        entity = largest_entity_mho.get_entity() 
+        entity_splits_dict[tuple(entity[:-1])].remove(entity)
+        for new_entity in new_entities:
+            entity_splits_dict[tuple(entity[:-1])].append(new_entity.get_entity())
 
-    return resulting_entity_list
+    #new_entity_list = [entity_mho.get_entity() for entity_mho in entity_mho_list]
+
+    # group together all entities that share id
+    grouped_entity_list = [entity_splits_dict[tuple(entity[:-1])] for entity in entity_list]
+
+    return grouped_entity_list
