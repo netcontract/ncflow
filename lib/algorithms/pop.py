@@ -169,7 +169,7 @@ class POP(PathFormulation):
             for pf, subproblem in zip(self._pfs, self._subproblem_list):
                 pf.solve(subproblem)
         else:
-            pool = multiprocessing.ProcessPool(self._num_subproblems)
+            pool = multiprocessing.ProcessPool(NUM_CORES)
             results = pool.map(self.solve_subproblem, range(self._num_subproblems))
             for (runtime, sol_dict), pf in zip(results, self._pfs):
                 pf._runtime = runtime

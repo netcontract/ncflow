@@ -1,9 +1,6 @@
 #! /usr/bin/env python
 
-import traceback
 import pickle
-import os
-from itertools import product
 import argparse
 
 import sys
