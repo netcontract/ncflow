@@ -16,7 +16,7 @@ from lib.algorithms import NcfEpi
 from lib.problem import Problem
 
 TOP_DIR = "ncflow-logs"
-OUTPUT_CSV = "ncflow.csv"
+OUTPUT_CSV_TEMPLATE = "ncflow-{}-{}.csv"
 
 # Sweep topos and traffic matrices for that topo. For each combo, record the
 # runtime and total flow for each algorithm
@@ -49,9 +49,9 @@ HEADERS = [
 PLACEHOLDER = ",".join("{}" for _ in HEADERS)
 
 
-def benchmark(problems):
+def benchmark(problems, output_csv):
 
-    with open(OUTPUT_CSV, "a") as results:
+    with open(output_csv, "a") as results:
         print_(",".join(HEADERS), file=results)
         for problem_name, topo_fname, tm_fname in problems:
             problem = Problem.from_file(topo_fname, tm_fname)
@@ -211,11 +211,11 @@ if __name__ == "__main__":
     if not os.path.exists(TOP_DIR):
         os.makedirs(TOP_DIR)
 
-    args, problems = get_args_and_problems()
+    _, output_csv, problems = get_args_and_problems(OUTPUT_CSV_TEMPLATE)
 
     if args.dry_run:
         print("Problems to run:")
         for problem in problems:
             print(problem)
     else:
-        benchmark(problems)
+        benchmark(problems, output_csv)

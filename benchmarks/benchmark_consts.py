@@ -102,15 +102,17 @@ def get_problems(args):
     return problems
 
 
-def get_args_and_problems():
+def get_args_and_problems(output_csv_template):
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", dest="dry_run", action="store_true", default=False)
-    parser.add_argument("--obj", type=str, choices=["total_flow", "mcf"])
+    parser.add_argument("--obj", type=str, choices=["total_flow", "mcf"], required=True)
     parser.add_argument(
         "--slices", type=int, choices=range(5), nargs="+", required=True
     )
     args = parser.parse_args()
-    return args, get_problems(args)
+    slice_str = 'slice_' + '_'.join(str(i) for i in args.slices)
+    output_csv = output_csv_template.format(args.obj, slice_str)
+    return args, output_csv, get_problems(args)
 
 
 def print_(*args, file=None):
