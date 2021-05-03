@@ -141,7 +141,10 @@ class POP(PathFormulation):
                 splitter = SmartSplitter(self._num_subproblems, paths_dict)
             else:
                 splitter = GenericSplitter(
-                    self._num_subproblems, pf_original, self._split_method, self._split_fraction
+                    self._num_subproblems,
+                    pf_original,
+                    self._split_method,
+                    self._split_fraction,
                 )
         else:
             raise Exception("Invalid split_method {}".format(self._split_method))
@@ -155,7 +158,11 @@ class POP(PathFormulation):
     def solve_subproblem(self, index):
         pf = self._pfs[index]
         subproblem = self._subproblem_list[index]
-        pf.solve(subproblem, num_threads=max(NUM_CORES // self._num_subproblems, 1)) # Force Gurobi to use a single thread
+        pf._paths_dict = self._paths_dict
+        pf.solve(
+            subproblem,
+            num_threads=max(NUM_CORES // self._num_subproblems, 1),
+        )  # Force Gurobi to use a single thread
         return (pf.runtime, pf.sol_dict)
 
     def solve(self, problem):
@@ -165,8 +172,10 @@ class POP(PathFormulation):
             PathFormulation.get_pf_for_obj(self._objective, self._num_paths)
             for subproblem in self._subproblem_list
         ]
+        self._paths_dict = self.get_paths(problem)
         if self.DEBUG:
             for pf, subproblem in zip(self._pfs, self._subproblem_list):
+                pf._paths_dict = self._paths_dict
                 pf.solve(subproblem)
         else:
             pool = multiprocessing.ProcessPool(NUM_CORES)
@@ -197,9 +206,7 @@ class POP(PathFormulation):
         )
 
     def runtime_est(self, num_threads):
-        return parallelized_rt(
-            [pf.runtime for pf in self._pfs], num_threads
-        )
+        return parallelized_rt([pf.runtime for pf in self._pfs], num_threads)
 
     @property
     def runtime(self):

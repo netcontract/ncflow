@@ -211,27 +211,29 @@ class PathFormulation(AbstractFormulation):
         return paths_dict
 
     def get_paths(self, problem):
-        paths_fname = PathFormulation.paths_full_fname(
-            problem, self._num_paths, self.edge_disjoint, self.dist_metric
-        )
-        self._print("Loading paths from pickle file", paths_fname)
+        if not hasattr(self, '_paths_dict'):
+            paths_fname = PathFormulation.paths_full_fname(
+                problem, self._num_paths, self.edge_disjoint, self.dist_metric
+            )
+            self._print("Loading paths from pickle file", paths_fname)
 
-        try:
-            with open(paths_fname, "rb") as f:
-                paths_dict = pickle.load(f)
-                for key, paths in paths_dict.items():
-                    paths_no_cycles = [remove_cycles(path) for path in paths]
-                    paths_dict[key] = paths_no_cycles
-                self._print("paths_dict size:", len(paths_dict))
-                return paths_dict
-        except FileNotFoundError:
-            self._print("Unable to find {}".format(paths_fname))
-            paths_dict = self.compute_paths(problem)
-            if self.VERBOSE:
-                self._print("Saving paths to pickle file")
-            with open(paths_fname, "wb") as w:
-                pickle.dump(paths_dict, w)
-            return paths_dict
+            try:
+                with open(paths_fname, "rb") as f:
+                    paths_dict = pickle.load(f)
+                    for key, paths in paths_dict.items():
+                        paths_no_cycles = [remove_cycles(path) for path in paths]
+                        paths_dict[key] = paths_no_cycles
+                    self._print("paths_dict size:", len(paths_dict))
+                    self._paths_dict = paths_dict
+            except FileNotFoundError:
+                self._print("Unable to find {}".format(paths_fname))
+                paths_dict = self.compute_paths(problem)
+                if self.VERBOSE:
+                    self._print("Saving paths to pickle file")
+                with open(paths_fname, "wb") as w:
+                    pickle.dump(paths_dict, w)
+                self._paths_dict = paths_dict
+        return self._paths_dict
 
     ###############################
     # Override superclass methods #
