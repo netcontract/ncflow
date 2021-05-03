@@ -12,7 +12,7 @@ class RandomSplitter(AbstractPOPSplitter):
     def split(self, problem):
         sub_problems = [problem.copy() for _ in range(self._num_subproblems)]
         # zero-out the traffic matrices; they will be populated at random using commodity list
-        for sp in subproblems:
+        for sp in sub_problems:
             for u in sp.G.nodes:
                 for v in sp.G.nodes:
                     sp.traffic_matrix.tm[u,v] = 0 
