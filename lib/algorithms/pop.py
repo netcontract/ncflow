@@ -4,6 +4,7 @@ from ..partitioning.pop import (
     BaselineSplitter,
     GenericSplitter,
     RandomSplitter,
+    RandomSplitter2,
 )
 from ..constants import NUM_CORES
 from ..runtime_utils import parallelized_rt
@@ -132,6 +133,8 @@ class POP(PathFormulation):
             splitter = BaselineSplitter(self._num_subproblems)
         elif self._split_method == "random":
             splitter = RandomSplitter(self._num_subproblems, self._split_fraction)
+        elif self._split_method == "random2":
+            splitter = RandomSplitter2(self._num_subproblems, self._split_fraction)
         elif self._split_method in ["tailored", "means", "covs"]:
             pf_original = PathFormulation.get_pf_for_obj(
                 self._objective, self._num_paths
