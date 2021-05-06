@@ -16,7 +16,7 @@ from lib.problem import Problem
 
 
 TOP_DIR = "pop-logs"
-OUTPUT_CSV_TEMPLATE = "pop-{}-{}.csv"
+OUTPUT_CSV_TEMPLATE = "pop-{}-{}-splitsweep.csv"
 
 # Sweep topos and traffic matrices for that topo. For each combo, record the
 # runtime and total flow for each algorithm
@@ -63,14 +63,13 @@ def benchmark(problems, output_csv, obj):
 
             num_paths, edge_disjoint, dist_metric = PATH_FORM_HYPERPARAMS
 
-            NUM_SUBPROBLEMS_SWEEP = [4, 16, 32]  # [2, 4, 8, 16, 32, 64]
+            NUM_SUBPROBLEMS_SWEEP = [16]  # [2, 4, 8, 16, 32, 64]
             SPLIT_METHODS_SWEEP = [
                 "random",
-                "means",
             ]  # ["tailored", "skewed", "random", "means", "covs"]
-            SPLIT_FRACTION = 0.1
-            for num_subproblems, split_method in product(
-                NUM_SUBPROBLEMS_SWEEP, SPLIT_METHODS_SWEEP
+            SPLIT_FRACTION_SWEEP = [0, 0.25, 0.5, 0.75, 1.0]
+            for num_subproblems, split_method, split_fraction in product(
+                NUM_SUBPROBLEMS_SWEEP, SPLIT_METHODS_SWEEP, SPLIT_FRACTION_SWEEP
             ):
                 run_dir = os.path.join(
                     TOP_DIR,
@@ -122,7 +121,7 @@ def benchmark(problems, output_csv, obj):
                             objective=Objective.get_obj_from_str(obj),
                             num_subproblems=num_subproblems,
                             split_method=split_method,
-                            split_fraction=SPLIT_FRACTION,
+                            split_fraction=split_fraction,
                             num_paths=num_paths,
                             edge_disjoint=edge_disjoint,
                             dist_metric=dist_metric,
@@ -144,7 +143,7 @@ def benchmark(problems, output_csv, obj):
                             total_demand,
                             "pop",
                             split_method,
-                            SPLIT_FRACTION,
+                            split_fraction,
                             num_subproblems,
                             num_paths,
                             edge_disjoint,

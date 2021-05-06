@@ -198,51 +198,88 @@ def get_ratio_dataframes(curr_dir, query_str=None):
         nc_iterative_df = nc_iterative_df.query(query_str)
 
     # POP DF
-    pop_df = pd.read_csv(curr_dir + "pop.csv")
+    pop_df = pd.read_csv(curr_dir + "pop-total_flow-slice_0-splitsweep.csv")
     pop_df = sort_and_set_index(pop_df, drop=True)
     if query_str is not None:
         pop_df = pop_df.query(query_str)
 
     # POP Entity Splitting DF
-    pop_entity_splitting_df = pd.read_csv(curr_dir + "pop_entitysplitting.csv")
-    pop_entity_splitting_df = sort_and_set_index(pop_entity_splitting_df, drop=True)
-    if query_str is not None:
-        pop_entity_splitting_df = pop_entity_splitting_df.query(query_str)
+#    pop_r2_df = pd.read_csv(curr_dir + "pop-total_flow-slice_0-random2.csv")
+#    pop_r2_df = sort_and_set_index(pop_r2_df, drop=True)
+#    if query_str is not None:
+#        pop_r2_df = pop_r2_df.query(query_str)
 
     def get_pop_dfs(pop_parent_df, suffix):
-        pop_tailored_16_df = pop_parent_df.query(
-            'split_method == "tailored" and num_subproblems == 16'
-        )
-        pop_tailored_4_df = pop_parent_df.query(
-            'split_method == "tailored" and num_subproblems == 4'
-        )
+        #pop_tailored_16_df = pop_parent_df.query(
+        #    'split_method == "tailored" and num_subproblems == 16'
+        #)
+        #pop_tailored_4_df = pop_parent_df.query(
+        #    'split_method == "tailored" and num_subproblems == 4'
+        #)
 
-        pop_random_16_df = pop_parent_df.query(
-            'split_method == "random" and num_subproblems == 16'
-        )
-        pop_random_4_df = pop_parent_df.query('split_method == "random" and num_subproblems == 4')
+        #pop_random_4_df = pop_parent_df.query(
+        #    'split_method == "random" and num_subproblems == 4'
+        #)
+        #pop_random_16_df = pop_parent_df.query('split_method == "random" and num_subproblems == 16')
+        #pop_random_32_df = pop_parent_df.query('split_method == "random" and num_subproblems == 32')
 
-        pop_means_16_df = pop_parent_df.query('split_method == "means" and num_subproblems == 16')
-        pop_means_4_df = pop_parent_df.query('split_method == "means" and num_subproblems == 4')
+        #pop_means_4_df = pop_parent_df.query('split_method == "means" and num_subproblems == 4')
+        #pop_means_16_df = pop_parent_df.query('split_method == "means" and num_subproblems == 16')
+        #pop_means_32_df = pop_parent_df.query('split_method == "means" and num_subproblems == 32')
+
+        #pop_random2_4_df = pop_parent_df.query(
+        #    'split_method == "random2" and num_subproblems == 4'
+        #)
+        #pop_random2_16_df = pop_parent_df.query('split_method == "random2" and num_subproblems == 16')
+        #pop_random2_32_df = pop_parent_df.query('split_method == "random2" and num_subproblems == 32')
+
+        pop_e0_poisson_df = pop_parent_df.query('split_fraction == 0 and tm_model == "poisson-high-intra"')
+        pop_e25_poisson_df = pop_parent_df.query('split_fraction == 0.25 and tm_model == "poisson-high-intra"')
+        pop_e50_poisson_df = pop_parent_df.query('split_fraction == 0.5 and tm_model == "poisson-high-intra"')
+        pop_e75_poisson_df = pop_parent_df.query('split_fraction == 0.75 and tm_model == "poisson-high-intra"')
+        pop_e100_poisson_df = pop_parent_df.query('split_fraction == 1.0 and tm_model == "poisson-high-intra"')
+       
+ 
+        pop_e0_gravity_df = pop_parent_df.query('split_fraction == 0 and tm_model == "gravity"')
+        pop_e25_gravity_df = pop_parent_df.query('split_fraction == 0.25 and tm_model == "gravity"')
+        pop_e50_gravity_df = pop_parent_df.query('split_fraction == 0.5 and tm_model == "gravity"')
+        pop_e75_gravity_df = pop_parent_df.query('split_fraction == 0.75 and tm_model == "gravity"')
+        pop_e100_gravity_df = pop_parent_df.query('split_fraction == 1.00 and tm_model == "gravity"')
+        
 
         return [
             get_ratio_df(df, path_form_df, "obj_val", suffix)
             for df in [
-                pop_tailored_16_df,
-                pop_tailored_4_df,
-                pop_random_16_df,
-                pop_random_4_df,
-                pop_means_16_df,
-                pop_means_4_df,
+                #pop_tailored_16_df,
+                #pop_tailored_4_df,
+                #pop_random_4_df,
+                #pop_random_16_df,
+                #pop_random_32_df,
+                #pop_means_4_df,
+                #pop_means_16_df,
+                #pop_means_32_df,
+                #pop_random2_4_df,
+                #pop_random2_16_df,
+                #pop_random2_32_df,
+                pop_e0_poisson_df,
+                pop_e25_poisson_df,
+                pop_e50_poisson_df,
+                pop_e75_poisson_df,
+                pop_e100_poisson_df,
+                pop_e0_gravity_df,
+                pop_e25_gravity_df,
+                pop_e50_gravity_df,
+                pop_e75_gravity_df,
+                pop_e100_gravity_df,
             ]
         ]
 
     pop_df_list = get_pop_dfs(pop_df, "_pop")
-    pop_entity_splitting_df_list = get_pop_dfs(pop_entity_splitting_df, "_pop_entity_splitting")
+    #pop_r2_df_list = get_pop_dfs(pop_r2_df, "_pop_r2")
 
     # Ratio DFs
     nc_ratio_df = get_ratio_df(nc_iterative_df, path_form_df, "obj_val", "_nc")
-    return pop_df_list + pop_entity_splitting_df_list + [nc_ratio_df]
+    return pop_df_list + [nc_ratio_df] #+ pop_r2_df_list
 
 
 def plot_speedup_relative_flow_cdfs(
@@ -251,23 +288,42 @@ def plot_speedup_relative_flow_cdfs(
     query_str='problem not in ["Uninett2010.graphml", "Ion.graphml", "Interoute.graphml"]',
 ):
     ratio_dfs = get_ratio_dataframes(curr_dir, query_str)
-    pop_tailored_16_df = ratio_dfs[0]
+    #pop_tailored_16_df = ratio_dfs[0]
     # pop_tailored_4_df = ratio_dfs[1]
 
-    pop_random_16_df = ratio_dfs[2]
-    # pop_random_4_df = ratio_dfs[3]
+    #pop_random_4_df = ratio_dfs[0]
+    #pop_random_16_df = ratio_dfs[1]
+    #pop_random_32_df = ratio_dfs[2]
 
-    # pop_means_16_df = ratio_dfs[4]
-    # pop_means_4_df = ratio_dfs[5]
+    #pop_means_4_df = ratio_dfs[3]
+    #pop_means_16_df = ratio_dfs[4]
+    #pop_means_32df = ratio_dfs[5]
 
-    pop_entity_splitting_tailored_16_df = ratio_dfs[6]
+    #pop_random2_4_df = ratio_dfs[6]
+    #pop_random2_16_df = ratio_dfs[7]
+    #pop_random2_32_df = ratio_dfs[8]
+
+    #pop_entity_splitting_tailored_16_df = ratio_dfs[6]
     # pop_entity_splitting_tailored_4_df = ratio_dfs[7]
 
-    pop_entity_splitting_random_16_df = ratio_dfs[8]
+    #pop_entity_splitting_random_16_df = ratio_dfs[8]
     # pop_entity_splitting_random_4_df = ratio_dfs[9]
 
-    pop_entity_splitting_means_16_df = ratio_dfs[10]
+    #pop_entity_splitting_means_16_df = ratio_dfs[10]
     # pop_entity_splitting_means_4_df = ratio_dfs[11]
+    
+    pop_e0_poisson_df = ratio_dfs[0]
+    pop_e25_poisson_df = ratio_dfs[1]
+    pop_e50_poisson_df = ratio_dfs[2]
+    pop_e75_poisson_df = ratio_dfs[3]
+    pop_e100_poisson_df = ratio_dfs[4]
+
+    pop_e0_gravity_df = ratio_dfs[5]
+    pop_e25_gravity_df = ratio_dfs[6]
+    pop_e50_gravity_df = ratio_dfs[7]
+    pop_e75_gravity_df = ratio_dfs[8]
+    pop_e100_gravity_df = ratio_dfs[9]
+
 
     nc_ratio_df = ratio_dfs[-1]
 
@@ -295,22 +351,31 @@ def plot_speedup_relative_flow_cdfs(
         print()
 
     # print_stats(nc_ratio_df, "NCFlow")
-    # print_stats(pop_random_16_df, "Random 16")
-    # print_stats(pop_tailored_16_df, "Tailored 16")
-    print_stats(pop_entity_splitting_random_16_df, "Random Entity Splitting 16")
-    print_stats(pop_entity_splitting_tailored_16_df, "Tailored Entity Splitting 16")
+    #print_stats(pop_random_16_df, "Random 16")
+    #print_stats(pop_random2_16_df, "Random2 16")
+    #print_stats(pop_means_16_df, "Means 16")
+    #print_stats(pop_entity_splitting_random_16_df, "Random Entity Splitting 16")
+    #print_stats(pop_entity_splitting_tailored_16_df, "Tailored Entity Splitting 16")
 
     # Plot CDFs
     plot_cdfs(
         [
             # nc_ratio_df["speedup_ratio"],
-            # pop_random_16_df["speedup_ratio"],
+            pop_e0_poisson_df["speedup_ratio"],
+            #pop_e25_poisson_df["speedup_ratio"],
+            pop_e50_poisson_df["speedup_ratio"],
+            #pop_e75_poisson_df["speedup_ratio"],
+            pop_e100_poisson_df["speedup_ratio"],
+            pop_e0_gravity_df["speedup_ratio"],
+            pop_e100_gravity_df["speedup_ratio"],
+            #pop_random2_4_df["speedup_ratio"],
+            #pop_means_4_df["speedup_ratio"]
             # pop_tailored_16_df["speedup_ratio"],
-            pop_entity_splitting_random_16_df["speedup_ratio"],
-            pop_entity_splitting_tailored_16_df["speedup_ratio"],
+            #pop_entity_splitting_random_16_df["speedup_ratio"],
+            #pop_entity_splitting_tailored_16_df["speedup_ratio"],
         ],
         # ["NCFlow", "Random, 16", "Tailored, 16", "Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
-        ["Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
+        ["Poisson, 0", "Poisson 50", "Poisson 100", "Gravity 0", "Gravity 100"],
         "speedup-cdf-{}".format(title),
         x_log=True,
         x_label=r"Speedup, relative to PF4 (log scale)",
@@ -323,13 +388,21 @@ def plot_speedup_relative_flow_cdfs(
     plot_cdfs(
         [
             # nc_ratio_df["flow_ratio"],
-            # pop_random_16_df["flow_ratio"],
-            # pop_tailored_16_df["flow_ratio"],
-            pop_entity_splitting_random_16_df["flow_ratio"],
-            pop_entity_splitting_tailored_16_df["flow_ratio"],
+            pop_e0_poisson_df["flow_ratio"],
+            #pop_e25_poisson_df["flow_ratio"],
+            pop_e50_poisson_df["flow_ratio"],
+            #pop_e75_poisson_df["flow_ratio"],
+            pop_e100_poisson_df["flow_ratio"],
+            pop_e0_gravity_df["flow_ratio"],
+            pop_e100_gravity_df["flow_ratio"],
+            #pop_random_4_df["flow_ratio"],
+            #pop_random2_4_df["flow_ratio"],
+            #pop_means_4_df["flow_ratio"],
+            #pop_entity_splitting_random_16_df["flow_ratio"],
+            #pop_entity_splitting_tailored_16_df["flow_ratio"],
         ],
         # ["NCFlow", "Random, 16", "Tailored, 16", "Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
-        ["Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
+        ["Poisson, 0", "Poisson 50", "Poisson 100", "Gravity 0", "Gravity 100"],
         "total-flow-cdf-{}".format(title),
         x_log=False,
         x_label=r"Total Flow, relative to PF4",
