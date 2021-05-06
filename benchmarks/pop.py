@@ -13,6 +13,7 @@ sys.path.append("..")
 from lib.constants import NUM_CORES
 from lib.algorithms import POP, Objective
 from lib.problem import Problem
+from lib.graph_utils import check_feasibility
 
 
 TOP_DIR = "pop-logs"
