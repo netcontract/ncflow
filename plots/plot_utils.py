@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import numpy as np
 
 # palette = sns.color_palette('Paired', 8)
 # sns.set_palette(palette)
@@ -119,6 +120,27 @@ def save_figure(filename, extra_artists=None, tight=True, ext=".pdf"):
         else:
             plt.savefig(filename)
 
+# Print stats
+def print_stats(df, df_name, cols_in_df):
+    for col_in_df in cols_in_df:
+        print(
+            "{} {} vs PF4:\nmin: {},\nmedian: {},\nmean: {},\nmax: {}".format(
+                df_name,
+                col_in_df,
+                np.min(df[col_in_df]),
+                np.median(df[col_in_df]),
+                np.mean(df[col_in_df]),
+                np.max(df[col_in_df]),
+            )
+        )
+        print()
+
+def sort_and_set_index(df, drop=False):
+    return change_poisson_in_df(
+        df.reset_index(drop=drop).sort_values(
+            by=["problem", "tm_model", "scale_factor", "traffic_seed"]
+        )
+    ).set_index(["problem", "tm_model", "traffic_seed", "scale_factor"])
 
 POISSON_HIGH_INTRA = set(
     [
