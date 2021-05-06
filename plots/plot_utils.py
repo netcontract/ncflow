@@ -13,6 +13,17 @@ plt.rcParams["lines.markersize"] = 11
 plt.rcParams["lines.linewidth"] = 4.0
 plt.rcParams["legend.handlelength"] = 2.25
 plt.rcParams["axes.grid"] = True
+sns.set_style('ticks')
+font = {
+    'font.family':'Roboto',
+    'font.size': 12,
+}
+sns.set_style(font)
+paper_rc = {
+    'lines.linewidth': 3,
+    'lines.markersize': 10,
+}
+sns.set_context("paper", font_scale=2, rc=paper_rc)
 sns.set_style({"axes.spines.right": False, "axes.spines.top": False})
 
 MARKER_NAMES_DICT = {
