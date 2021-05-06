@@ -375,13 +375,13 @@ def plot_speedup_relative_flow_cdfs(
             #pop_entity_splitting_tailored_16_df["speedup_ratio"],
         ],
         # ["NCFlow", "Random, 16", "Tailored, 16", "Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
-        ["Poisson, 0", "Poisson 50", "Poisson 100", "Gravity 0", "Gravity 100"],
+        ["Poisson, 0%", "Poisson, 50%", "Poisson, 100%", "Gravity, 0%", "Gravity, 100%"],
         "speedup-cdf-{}".format(title),
         x_log=True,
         x_label=r"Speedup, relative to PF4 (log scale)",
         bbta=(0, 0, 1, 1.4),
         figsize=(9, 4.5),
-        ncol=4,
+        ncol=3,
         title=title,
     )
 
@@ -402,13 +402,13 @@ def plot_speedup_relative_flow_cdfs(
             #pop_entity_splitting_tailored_16_df["flow_ratio"],
         ],
         # ["NCFlow", "Random, 16", "Tailored, 16", "Random, Entity Splitting, 16", "Tailored, Entity Splitting, 16"],
-        ["Poisson, 0", "Poisson 50", "Poisson 100", "Gravity 0", "Gravity 100"],
+        ["Poisson, 0%", "Poisson, 50%", "Poisson, 100%", "Gravity, 0%", "Gravity, 100%"],
         "total-flow-cdf-{}".format(title),
         x_log=False,
         x_label=r"Total Flow, relative to PF4",
         bbta=(0, 0, 1, 1.4),
         figsize=(9, 4.5),
-        ncol=4,
+        ncol=3,
         title=title,
     )
 
