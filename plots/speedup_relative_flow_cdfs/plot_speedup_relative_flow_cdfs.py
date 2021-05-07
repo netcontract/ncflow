@@ -175,10 +175,10 @@ def per_iter_to_nc_df(per_iter_fname):
     return sort_and_set_index(nc_iterative_df)
 
 
-def get_ratio_dataframes(curr_dir, query_str=None):
+def get_ratio_dataframes(path_form_csv, pop_csv, query_str=None):
     # Path Formulation DF
     path_form_df = (
-        pd.read_csv(curr_dir + "path-form.csv")
+        pd.read_csv(path_form_csv)
         .drop(columns=["num_nodes", "num_edges", "num_commodities"])
         .query(PF_PARAMS)
     )
@@ -186,57 +186,31 @@ def get_ratio_dataframes(curr_dir, query_str=None):
     if query_str is not None:
         path_form_df = path_form_df.query(query_str)
 
-    # NC Iterative DF
-    nc_iterative_df = per_iter_to_nc_df(curr_dir + "per-iteration.csv")
-    if query_str is not None:
-        nc_iterative_df = nc_iterative_df.query(query_str)
-
     # POP DF
-    pop_df = pd.read_csv(curr_dir + "pop.csv")
+    pop_df = pd.read_csv(pop_csv)
     pop_df = sort_and_set_index(pop_df, drop=True)
+    pop_df = pop_df.query('split_fraction == 0.75 and tm_model == "poisson-high-intra" or split_fraction == 0.0 and tm_model != "poisson-high-intra"')
+    print(pop_df)
     if query_str is not None:
         pop_df = pop_df.query(query_str)
 
-    # POP Entity Splitting DF
-    pop_entity_splitting_df = pd.read_csv(curr_dir + "pop_entitysplitting.csv")
-    pop_entity_splitting_df = sort_and_set_index(pop_entity_splitting_df, drop=True)
-    if query_str is not None:
-        pop_entity_splitting_df = pop_entity_splitting_df.query(query_str)
-
     def get_pop_dfs(pop_parent_df, suffix):
-        pop_tailored_16_df = pop_parent_df.query(
-            'split_method == "tailored" and num_subproblems == 16'
+        pop_random_16_df_kdl = pop_parent_df.query(
+            'split_method == "random" and num_subproblems == 16 and problem == "Kdl.graphml"'
         )
-        pop_tailored_4_df = pop_parent_df.query(
-            'split_method == "tailored" and num_subproblems == 4'
+        pop_random_16_df_non_kdl = pop_parent_df.query(
+            'split_method == "random" and num_subproblems == 16 and problem != "Kdl.graphml"'
         )
-
-        pop_random_16_df = pop_parent_df.query(
-            'split_method == "random" and num_subproblems == 16'
-        )
-        pop_random_4_df = pop_parent_df.query('split_method == "random" and num_subproblems == 4')
-
-        pop_means_16_df = pop_parent_df.query('split_method == "means" and num_subproblems == 16')
-        pop_means_4_df = pop_parent_df.query('split_method == "means" and num_subproblems == 4')
 
         return [
             get_ratio_df(df, path_form_df, "obj_val", suffix)
             for df in [
-                pop_tailored_16_df,
-                pop_tailored_4_df,
-                pop_random_16_df,
-                pop_random_4_df,
-                pop_means_16_df,
-                pop_means_4_df,
+                pop_random_16_df_kdl,
+                pop_random_16_df_non_kdl
             ]
         ]
 
-    pop_df_list = get_pop_dfs(pop_df, "_pop")
-    pop_entity_splitting_df_list = get_pop_dfs(pop_entity_splitting_df, "_pop_entity_splitting")
-
-    # Ratio DFs
-    nc_ratio_df = get_ratio_df(nc_iterative_df, path_form_df, "obj_val", "_nc")
-    return pop_df_list + pop_entity_splitting_df_list + [nc_ratio_df]
+    return get_pop_dfs(pop_df, "_pop")
 
 
 def plot_speedup_relative_flow_cdfs(

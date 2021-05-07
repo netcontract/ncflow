@@ -24,7 +24,8 @@ def scatter(
     xlim=0,
     ylim=(10e-3, 5e3),
     title=None,
-    log=False,
+    xlog=False,
+    ylog=False,
     bbta=(0, 0, 1, 1),
     ncol=2,
     figsize=(8, 6),
@@ -38,12 +39,13 @@ def scatter(
         fig, ax = plt.subplots(figsize=figsize)
 
     for ratio_df, label, short_label in zip(ratio_dfs, labels, short_labels):
+        print(label, ratio_df)
         ax.scatter(
             ratio_df[x_axis],
             ratio_df[y_axis],
             alpha=0.75,
             label=label,
-            marker="x",
+            marker="o",
             linewidth=1,
             color=COLOR_NAMES_DICT[short_label],
         )
@@ -56,7 +58,9 @@ def scatter(
         ax.set_ylabel(ylabel)
     if title:
         ax.set_title(title)
-    if log:
+    if xlog:
+        ax.set_xscale("log")
+    if ylog:
         ax.set_yscale("log")
     if ylim is not None:
         ax.set_ylim(ylim)
@@ -97,7 +101,8 @@ def scatter(
         plt.show()
     if save:
         save_figure(
-            "scatter-plot-{}-{}".format(x_axis, y_axis), extra_artists=extra_artists
+            "scatter-plot-{}-{}-{}".format(x_axis, y_axis, title),
+            extra_artists=extra_artists
         )
 
 

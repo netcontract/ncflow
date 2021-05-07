@@ -53,6 +53,9 @@ def get_ratio_df(other_df, baseline_df, target_col, suffix):
         ],
         data=results,
     )
+
+    print(df)
+
     return df
 
 
@@ -133,10 +136,10 @@ def plot_cdfs(
     # plt.show()
 
 
-def get_ratio_dataframes(curr_dir, query_str=None):
+def get_ratio_dataframes(path_form_csv, pop_csv, query_str=None):
     # Path Formulation DF
     path_form_df = (
-        pd.read_csv(curr_dir + "path-form.csv")
+        pd.read_csv(path_form_csv)
         .drop(columns=["num_nodes", "num_edges", "num_commodities"])
         .query(PF_PARAMS)
     )
@@ -145,41 +148,24 @@ def get_ratio_dataframes(curr_dir, query_str=None):
         path_form_df = path_form_df.query(query_str)
 
     # POP DF
-    pop_df = pd.read_csv(curr_dir + "pop.csv")
+    pop_df = pd.read_csv(pop_csv)
     pop_df = sort_and_set_index(pop_df, drop=True)
     if query_str is not None:
         pop_df = pop_df.query(query_str)
 
     def get_pop_dfs(pop_parent_df, suffix):
-        pop_random_32_df = pop_parent_df.query(
-            'split_method == "random" and num_subproblems == 32'
+        pop_random_16_df_kdl = pop_parent_df.query(
+            'split_method == "random" and num_subproblems == 16 and problem == "Kdl.graphml"'
         )
-        pop_random_16_df = pop_parent_df.query(
-            'split_method == "random" and num_subproblems == 16'
-        )
-        pop_random_4_df = pop_parent_df.query(
-            'split_method == "random" and num_subproblems == 4'
-        )
-
-        pop_means_32_df = pop_parent_df.query(
-            'split_method == "means" and num_subproblems == 32'
-        )
-        pop_means_16_df = pop_parent_df.query(
-            'split_method == "means" and num_subproblems == 16'
-        )
-        pop_means_4_df = pop_parent_df.query(
-            'split_method == "means" and num_subproblems == 4'
+        pop_random_16_df_non_kdl = pop_parent_df.query(
+            'split_method == "random" and num_subproblems == 16 and problem != "Kdl.graphml"'
         )
 
         return [
             get_ratio_df(df, path_form_df, "obj_val", suffix)
             for df in [
-                pop_random_32_df,
-                pop_random_16_df,
-                pop_random_4_df,
-                pop_means_32_df,
-                pop_means_16_df,
-                pop_means_4_df,
+                pop_random_16_df_kdl,
+                pop_random_16_df_non_kdl,
             ]
         ]
 
