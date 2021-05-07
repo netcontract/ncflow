@@ -17,7 +17,7 @@ from lib.graph_utils import check_feasibility
 
 
 TOP_DIR = "pop-logs"
-OUTPUT_CSV_TEMPLATE = "pop-{}-{}-splitsweep.csv"
+OUTPUT_CSV_TEMPLATE = "pop-{}-{}.csv"
 
 # Sweep topos and traffic matrices for that topo. For each combo, record the
 # runtime and total flow for each algorithm
@@ -68,10 +68,12 @@ def benchmark(problems, output_csv, obj):
             SPLIT_METHODS_SWEEP = [
                 "random",
             ]  # ["tailored", "skewed", "random", "means", "covs"]
-            SPLIT_FRACTION_SWEEP = [0, 0.25, 0.5, 0.75, 1.0]
+            SPLIT_FRACTION_SWEEP = [0] # [0, 0.25, 0.5, 0.75, 1.0]
             for num_subproblems, split_method, split_fraction in product(
                 NUM_SUBPROBLEMS_SWEEP, SPLIT_METHODS_SWEEP, SPLIT_FRACTION_SWEEP
             ):
+                if 'poisson-high-intra' in tm_fname:
+                    split_fraction = 0.75
                 run_dir = os.path.join(
                     TOP_DIR,
                     problem.name,
