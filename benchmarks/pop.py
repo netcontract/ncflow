@@ -132,9 +132,9 @@ def benchmark(problems, output_csv, obj):
                         )
                         pop.solve(problem)
                         sol_dict = pop.sol_dict
-                        check_feasibility(problem, [sol_dict])
                         with open(log.name.replace(".txt", "-sol-dict.pkl"), "wb") as w:
                             pickle.dump(sol_dict, w)
+                        check_feasibility(problem, [sol_dict])
 
                         result_line = PLACEHOLDER.format(
                             problem_name,
