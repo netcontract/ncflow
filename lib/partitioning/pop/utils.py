@@ -7,7 +7,7 @@ from ...graph_utils import path_to_edge_list
 from kmodes.kprototypes import KPrototypes
 from sklearn.cluster import KMeans
 from .entity_splitting import split_entities
-
+import time
 
 def create_edges_onehot_dict(problem, pf_original, num_subproblems, split_fraction=0.1):
     paths_dict = pf_original.get_paths(problem)
@@ -62,7 +62,7 @@ def create_edges_onehot_dict(problem, pf_original, num_subproblems, split_fracti
         np_data[np_data_i, -1] = norm_demand
         np_data_i += 1
 
-    return com_path_edges_onehot_dict
+    return com_path_edges_onehot_dict, np_data
 
 
 
@@ -273,6 +273,8 @@ def compute_precluster(data, num_clusters, categorical_indices=None):
 # cluster data according to provided precluster (or compute it on the fly)
 def cluster(data, k, precluster):
     # compute clusters, which is a list of cluster ids, one for each data item
+    print(data[0,:])
+
     start_time = time.time()
     clusters = precluster.predict(data)
     print("--- %s seconds ---" % (time.time() - start_time))

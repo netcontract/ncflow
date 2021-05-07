@@ -135,7 +135,7 @@ class POP(PathFormulation):
             splitter = RandomSplitter(self._num_subproblems, self._split_fraction)
         elif self._split_method == "random2":
             splitter = RandomSplitter2(self._num_subproblems, self._split_fraction)
-        elif self._split_method in ["tailored", "means", "covs"]:
+        elif self._split_method in ["tailored", "means", "covs", "cluster"]:
             pf_original = PathFormulation.get_pf_for_obj(
                 self._objective, self._num_paths
             )

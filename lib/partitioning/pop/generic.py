@@ -1,5 +1,6 @@
 from .abstract_pop_splitter import AbstractPOPSplitter
-from .utils import create_edges_onehot_dict, split_generic
+from .utils import create_edges_onehot_dict, split_generic, compute_precluster
+import math
 
 class GenericSplitter(AbstractPOPSplitter):
     def __init__(self, num_subproblems, pf, method="means", split_fraction=0.1, verbose=False):
@@ -10,7 +11,7 @@ class GenericSplitter(AbstractPOPSplitter):
         self.split_fraction = split_fraction
 
     def split(self, problem):
-        input_dict = create_edges_onehot_dict(problem, self._pf, self._num_subproblems, self.split_fraction)
+        input_dict, np_data = create_edges_onehot_dict(problem, self._pf, self._num_subproblems, self.split_fraction)
 
         # create subproblems, zero out commodities in traffic matrix that aren't assigned to each
         sub_problems = [problem.copy() for _ in range(self._num_subproblems)]
@@ -23,9 +24,23 @@ class GenericSplitter(AbstractPOPSplitter):
                 for v in sp.G.nodes:
                     sp.traffic_matrix.tm[u,v] = 0
 
+        precluster = None
+        if self.method is "cluster":
+
+            precluster = compute_precluster(np_data, int(math.sqrt(len(problem.G.nodes))), 
+                             categorical_indices=list(range(len(problem.G.edges)))
+                         )
+            
         entity_assignments_lists = split_generic(
-            input_dict, self._num_subproblems, verbose=self.verbose, method=self.method
+            input_dict, self._num_subproblems, verbose=self.verbose, method=self.method, 
+            precluster=precluster, np_data=np_data
         )
+
+        if self.method is "cluster":
+            # replace commodity id index with commodity id (assuming ordereddict)
+            commodity_ids_list = list(input_dict.keys())
+            for entity_assignment_list in entity_assignment_lists:
+                entity_assignment_list = [commodity_ids_list[x] for x in entity_assignment_list]
 
         for i in range(self._num_subproblems):
 
