@@ -3,7 +3,6 @@
 import traceback
 import pickle
 import os
-from itertools import product
 from benchmark_consts import get_args_and_problems, print_, PATH_FORM_HYPERPARAMS
 
 import sys
@@ -42,7 +41,7 @@ HEADERS = [
     "runtime",
 ]
 PLACEHOLDER = ",".join("{}" for _ in HEADERS)
-SPLIT_METHOD = "random",
+SPLIT_METHOD = "random"
 SPLIT_FRACTION = 0
 
 
