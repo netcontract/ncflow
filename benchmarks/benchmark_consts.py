@@ -42,11 +42,11 @@ NCFLOW_HYPERPARAMS = {
 }
 
 TM_MODELS = [
-#    "uniform",
+    "uniform",
     "gravity",
-#    "bimodal",
+    "bimodal",
     "poisson-high-intra",
-#    "poisson-high-inter",
+    "poisson-high-inter",
 ]
 PROBLEM_NAMES_AND_TM_MODELS = [
     (prob_name, tm_model) for prob_name in PROBLEM_NAMES for tm_model in TM_MODELS
