@@ -3,6 +3,7 @@ from .utils import create_edges_onehot_dict, split_generic, compute_precluster
 import math
 
 class GenericSplitter(AbstractPOPSplitter):
+    # TODO: change this so that it no longer takes in a PathFormulation object as an argument
     def __init__(self, num_subproblems, pf, method="means", split_fraction=0.1, verbose=False):
         super().__init__(num_subproblems)
         self._pf = pf
@@ -25,7 +26,7 @@ class GenericSplitter(AbstractPOPSplitter):
                     sp.traffic_matrix.tm[u,v] = 0
 
         precluster = None
-        if self.method is "cluster":
+        if self.method == "cluster":
 
             precluster = compute_precluster(np_data, int(math.sqrt(len(problem.G.nodes))), 
                              categorical_indices=list(range(len(problem.G.edges)))
@@ -36,7 +37,7 @@ class GenericSplitter(AbstractPOPSplitter):
             precluster=precluster, np_data=np_data
         )
 
-        if self.method is "cluster":
+        if self.method == "cluster":
             # replace commodity id index with commodity id (assuming ordereddict)
             commodity_ids_list = list(input_dict.keys())
             for entity_assignment_list in entity_assignment_lists:

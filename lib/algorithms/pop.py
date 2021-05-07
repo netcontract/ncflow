@@ -136,13 +136,18 @@ class POP(PathFormulation):
         elif self._split_method == "random2":
             splitter = RandomSplitter2(self._num_subproblems, self._split_fraction)
         elif self._split_method in ["tailored", "means", "covs", "cluster"]:
-            pf_original = PathFormulation.get_pf_for_obj(
-                self._objective, self._num_paths
-            )
             if self._split_method == "tailored":
-                paths_dict = pf_original.compute_paths(problem)
+                paths_dict = PathFormulation.read_paths_from_disk_or_compute(
+                    problem, self._num_paths, self.edge_disjoint, self.dist_metric
+                )
                 splitter = SmartSplitter(self._num_subproblems, paths_dict)
             else:
+                pf_original = PathFormulation.get_pf_for_obj(
+                    self._objective,
+                    self._num_paths,
+                    edge_disjoint=self.edge_disjoint,
+                    dist_metric=self.dist_metric,
+                )
                 splitter = GenericSplitter(
                     self._num_subproblems,
                     pf_original,
@@ -163,8 +168,7 @@ class POP(PathFormulation):
         subproblem = self._subproblem_list[index]
         pf._paths_dict = self._paths_dict
         pf.solve(
-            subproblem,
-            num_threads=max(NUM_CORES // self._num_subproblems, 1),
+            subproblem, num_threads=max(NUM_CORES // self._num_subproblems, 1),
         )  # Force Gurobi to use a single thread
         return (pf.runtime, pf.sol_dict)
 

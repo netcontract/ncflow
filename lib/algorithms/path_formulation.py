@@ -198,41 +198,48 @@ class PathFormulation(AbstractFormulation):
             ),
         )
 
-    def compute_paths(self, problem):
+    @staticmethod
+    def compute_paths(problem, num_paths, edge_disjoint, dist_metric):
         paths_dict = {}
-        G = graph_copy_with_edge_weights(problem.G, self.dist_metric)
+        G = graph_copy_with_edge_weights(problem.G, dist_metric)
         for s_k in G.nodes:
             for t_k in G.nodes:
                 if s_k == t_k:
                     continue
-                paths = find_paths(G, s_k, t_k, self._num_paths, self.edge_disjoint)
+                paths = find_paths(G, s_k, t_k, num_paths, edge_disjoint)
                 paths_no_cycles = [remove_cycles(path) for path in paths]
                 paths_dict[(s_k, t_k)] = paths_no_cycles
         return paths_dict
 
+    @staticmethod
+    def read_paths_from_disk_or_compute(problem, num_paths, edge_disjoint, dist_metric):
+        paths_fname = PathFormulation.paths_full_fname(
+            problem, num_paths, edge_disjoint, dist_metric
+        )
+        print("Loading paths from pickle file", paths_fname)
+
+        try:
+            with open(paths_fname, "rb") as f:
+                paths_dict = pickle.load(f)
+                for key, paths in paths_dict.items():
+                    paths_no_cycles = [remove_cycles(path) for path in paths]
+                    paths_dict[key] = paths_no_cycles
+                print("paths_dict size:", len(paths_dict))
+                return paths_dict
+        except FileNotFoundError:
+            print("Unable to find {}".format(paths_fname))
+            paths_dict = PathFormulation.compute_paths(problem, num_paths, edge_disjoint, dist_metric)
+            print("Saving paths to pickle file")
+            with open(paths_fname, "wb") as w:
+                pickle.dump(paths_dict, w)
+            return paths_dict
+
+
     def get_paths(self, problem):
         if not hasattr(self, '_paths_dict'):
-            paths_fname = PathFormulation.paths_full_fname(
+            self._paths_dict = PathFormulation.read_paths_from_disk_or_compute(
                 problem, self._num_paths, self.edge_disjoint, self.dist_metric
             )
-            self._print("Loading paths from pickle file", paths_fname)
-
-            try:
-                with open(paths_fname, "rb") as f:
-                    paths_dict = pickle.load(f)
-                    for key, paths in paths_dict.items():
-                        paths_no_cycles = [remove_cycles(path) for path in paths]
-                        paths_dict[key] = paths_no_cycles
-                    self._print("paths_dict size:", len(paths_dict))
-                    self._paths_dict = paths_dict
-            except FileNotFoundError:
-                self._print("Unable to find {}".format(paths_fname))
-                paths_dict = self.compute_paths(problem)
-                if self.VERBOSE:
-                    self._print("Saving paths to pickle file")
-                with open(paths_fname, "wb") as w:
-                    pickle.dump(paths_dict, w)
-                self._paths_dict = paths_dict
         return self._paths_dict
 
     ###############################
