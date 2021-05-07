@@ -266,17 +266,16 @@ def compute_precluster(data, num_clusters, categorical_indices=None):
         kp = KMeans(n_clusters=num_clusters)
         kp.fit(data)
     else:
-        kp = KPrototypes(n_clusters=num_clusters, init='Huang', n_init=1, verbose=1, n_jobs=24, max_iter=8)
+        kp = KPrototypes(n_clusters=num_clusters, init='Cao', n_init=1, verbose=1, n_jobs=24, max_iter=5)
         clusters = kp.fit(data, categorical=categorical_indices)
     return kp
 
 # cluster data according to provided precluster (or compute it on the fly)
-def cluster(data, k, precluster):
+def cluster(data, k, precluster, categorical):
     # compute clusters, which is a list of cluster ids, one for each data item
-    print(data[0,:])
 
     start_time = time.time()
-    clusters = precluster.predict(data)
+    clusters = precluster.predict(data, categorical)
     print("--- %s seconds ---" % (time.time() - start_time))
     #print(clusters)
 
@@ -306,10 +305,10 @@ def cluster(data, k, precluster):
 # input_dict: keys are entities and values are (ordered) list of entity dimensions, 
 # k: number of subproblems
 def split_generic(input_dict, k, verbose=False, 
-                  method='means', precluster=None, np_data=None):
+                  method='means', precluster=None, np_data=None, categorical=None):
     
     if method == 'cluster':
-        subproblem_entity_assignments = cluster(np_data, k, precluster=precluster)
+        subproblem_entity_assignments = cluster(np_data, k, precluster=precluster, categorical=categorical)
     elif method == 'means' or method == 'covs':
         subproblem_entity_assignments = two_choice(input_dict, k, verbose=verbose, method=method)
     

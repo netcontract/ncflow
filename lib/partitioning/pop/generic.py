@@ -27,22 +27,21 @@ class GenericSplitter(AbstractPOPSplitter):
 
         precluster = None
         if self.method == "cluster":
-
             precluster = compute_precluster(np_data, int(math.sqrt(len(problem.G.nodes))), 
-                             categorical_indices=list(range(len(problem.G.edges)))
+                             categorical_indices=categorical
                          )
             
         entity_assignments_lists = split_generic(
             input_dict, self._num_subproblems, verbose=self.verbose, method=self.method, 
-            precluster=precluster, np_data=np_data
+            precluster=precluster, np_data=np_data, categorical=categorical
         )
 
         if self.method == "cluster":
             # replace commodity id index with commodity id (assuming ordereddict)
             commodity_ids_list = list(input_dict.keys())
-            for entity_assignment_list in entity_assignment_lists:
-                entity_assignment_list = [commodity_ids_list[x] for x in entity_assignment_list]
-
+            for i in range(len(entity_assignments_lists)):
+                entity_assignments_lists[i] = [commodity_ids_list[x] for x in entity_assignments_lists[i]]
+ 
         for i in range(self._num_subproblems):
 
             # populate TM for commodities assigned to subproblem i
